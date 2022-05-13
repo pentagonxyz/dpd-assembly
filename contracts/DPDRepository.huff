@@ -1,3 +1,7 @@
+/* Imports */
+#include "./contracts/utils/Address.huff"
+#include "./contracts/utils/HashMap.huff"
+
 /* Interface */
 
 #define function dpds(uint256) view returns(bytes,address)
@@ -9,3 +13,28 @@
 
 #define function setDpdOwner(uint256,address) nonpayable returns()
 #define function setDpdUpdater(uint256,address) nonpayable returns()
+
+#define event DPDAdded(uint256, address, address,bytes)
+#define event DPDUpdated(uint256,uint256,bytes)
+#define event DPDOwnerChanged(uint256,address)
+#define event DPDUpdaterChanged(uint256,address)
+
+/* Event Signatures */
+
+// event DPDAdded(uint256, address, address,bytes)
+#define constant DPD_ADDED_EVENT_SIGNATURE = 0x95fe7b77092b58e9c8b9ae5ef3d58bbc59c44859c4afa4dad29538874dab4b46
+
+
+// event DPDUpdated(uint256,uint256,bytes)
+#define constant DPD_UPDATED_EVENT_SIGNATURE = 0x506c0ddb12120d4fe8bb92afc7c2d8401d27d4f1f32ed265952c6f5888cb1269
+
+// event DPDOwnerChanged(uint256,address)
+#define constant DPD_OWNER_CHANGED_EVENT_SIGNATURE = 0xaccf2a113cd975e46358a972cc76275e3d1f21b97ca3f668c911f91b0e9bf14a
+
+// event DPDUpdaterChanged(uint256,address)
+#define constant DPD_UPDATER_CHANGED_EVENT_SIGNATURE = 0x79e446654be92d32ba07e4935511105931d7b6dfbe59a0eb00e2ee27f6b5bf8e
+
+/* Storage Slots */
+
+
+/* DPD Initialization */
