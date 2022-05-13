@@ -1,0 +1,11 @@
+/* Interface */
+
+#define function dpds(uint256) view returns(bytes,address)
+#define function updaters(uint256) view returns(address)
+#define function versions(uint256) view returns(uint256)
+
+#define function addDpd(bytes,address,address) nonpayable returns(uint256)
+#define function updateDpd(uint256,bytes) nonpayable returns(uint256)
+
+#define function setDpdOwner(uint256,address) nonpayable returns()
+#define function setDpdUpdater(uint256,address) nonpayable returns()
