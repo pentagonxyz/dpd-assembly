@@ -4,6 +4,8 @@
 
 // Given an offset that points to a location in calldata, store the input in memory at the mem_offset.
 // This macro will also return the mem_offset incremented by the size of the input, as well as the length of the data (excluding the 32 bytes used to give the length).
+
+// HOLY COW IM DOING THIS WRONG, ITS ACTUALLY MUCH EASIER READ THIS: https://docs.soliditylang.org/en/develop/abi-spec.html#use-of-dynamic-types
 #define macro READ_BYTES_FROM_CALLDATA(cd_offset, mem_offset) = takes(0) returns (2) {
     // Input stack: []
     // Read the length from calldata and store it in memory.
