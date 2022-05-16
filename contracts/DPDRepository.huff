@@ -3,7 +3,6 @@
 #include "./contracts/utils/HashMap.huff"
 
 /* Interface */
-
 #define function dpds(uint256) view returns(bytes,address)
 #define function updaters(uint256) view returns(address)
 #define function versions(uint256) view returns(uint256)
@@ -34,11 +33,29 @@
 #define constant DPD_UPDATER_CHANGED_EVENT_SIGNATURE = 0x79e446654be92d32ba07e4935511105931d7b6dfbe59a0eb00e2ee27f6b5bf8e
 
 /* Storage Slots */
-#define constant DPD_MAP_SLOT = FREE_STORAGE_POINTER() 
+#define constant DPD_ARRAY_SLOT = FREE_STORAGE_POINTER() 
+#define constant DPD_ARRAY_LENGTH_SLOT = FREE_STORAGE_POINTER()
+
 #define constant VERSION_MAP_SLOT = FREE_STORAGE_POINTER()
+#define constant DPD_OWNER_MAP_SLOT = FREE_STORAGE_POINTER()
 #define constant DPD_UPDATER_MAP_SLOT = FREE_STORAGE_POINTER()
+
+/* DPD Initialization */
+#define macro ADD_DPD() = takes(0) returns (0) {
+    // Note that the length is updated after the DPD is added.
+    // The DPD_ARRAY is essentially a map that uses the current length as the key.
+    0x04 calldataload               // [CID]
+    [DPD_ARRAY_LENGTH_SLOT] sload   // [dpdArray.length, CID]
+    [DPD_ARRAY_SLOT] sstore         // [dpdArraySlot, dpdArray.length, CID]
+    STORE_ELEMENT_FROM_KEYS(msize)  // []
+
+}
 
 /* Main Macro */
 #define macro MAIN() = takes(0) returns (0) {
     0x00 calldataload 0xE0 shr // [sig]
+    dup1 0xbb030beb eq add_dpd jumpi
+
+    add_dpd:
+        ADD_DPD()
 } 

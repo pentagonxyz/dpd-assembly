@@ -1,3 +1,8 @@
+/* 
+    Macros that enable you to set an owner address, which you can use to gatekeep calls from regular users. 
+*/
+
+
 /* Storage */
 #define constant OWNER_POINTER = FREE_STORAGE_POINTER()
 
