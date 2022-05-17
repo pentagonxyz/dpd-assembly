@@ -2,55 +2,73 @@
     Macros that enable you to store data in a hashmap.
 */
 
-// Given a piece of data (ie an address), hash it, generating the storage slot for a hashmap.
+/// @dev Hash a piece of data, representing a key, to generate the storage slot that the data will be located.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input stack: [key]
+/// Output stack: [slot]
 #define macro GET_SLOT_FROM_KEY(mem_offset) = takes(1) returns (1) {
-    // Input stack: [key]
     // Load the data into memory and hash it, while preserving the memory location.
-    <mem_offset>   // [<mem_offset>, key]
-    mstore      // []
+    <mem_offset>    // [<mem_offset>, key]
+    mstore          // []
     
     // Hash the data, generating a key.
-    0x20                // [32]
-    <mem_offset>           // [<mem_offset>, 32]
-    sha3                // [slot]
+    0x20            // [32]
+    <mem_offset>    // [<mem_offset>, 32]
+    sha3            // [slot]
 }
 
-// Given two keys (ie an address and a number), hash them together, generating a  for a secondary hashmap.
-// This should only be used if you have multiple maps in your contract.
+/// @dev Hash two pieces of data, representing a key and a salt, to generate the storage slot that the data will be located.
+/// Note that using a salt when hashing keys is essential when your map has multiple maps.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input stack: [key, salt]
+/// Output stack: [slot]
 #define macro GET_SLOT_FROM_KEYS(mem_offset) = takes(2) returns (1) {
-    // Input stack: [key1, key2]
     // Load the data into memory.
-    <mem_offset>           // [<mem_offset>, key1, key2]
-    mstore              // [key2]
-    <mem_offset> 0x20 add  // [<mem_offset> + 32, key2]
-    mstore              // []
+    <mem_offset>            // [<mem_offset>, key1, salt]
+    mstore                  // [salt]
+    <mem_offset> 0x20 add   // [<mem_offset> + 32, salt]
+    mstore                  // []
     
     // Hash the data, generating a key.
-    0x40        // [64]
-    <mem_offset>   // [<mem_offset>, 64]
-    sha3        // [key]
+    0x40                    // [64]
+    <mem_offset>            // [<mem_offset>, 64]
+    sha3                    // [slot]
 }
 
+/// @dev Given a key, load it's value from storage.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input stack: [key]
+/// Output stack: [value]
 #define macro LOAD_ELEMENT(mem_offset) = takes(1) returns(1) {
-    // Input stack: [key]
-    GET_SLOT_FROM_KEY(<mem_offset>)  // [slot]
-    sload                       // [value]
+    GET_SLOT_FROM_KEY(<mem_offset>)     // [slot]
+    sload                               // [value]
 }
 
+/// @dev Given a key and a salt, load their corresponding value from storage.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input stack: [key, salt]
+/// Output stack: [value]
 #define macro LOAD_ELEMENT_FROM_KEYS(mem_offset) = takes(2) returns(1) {
-    // Input stack: [key1, key2]
     GET_SLOT_FROM_KEYS(<mem_offset>) // [slot]
-    sload                       // [value]
+    sload                            // [value]
 }
 
+/// @dev Given a key and a value, store the value in the key's corresponding storage slot.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input Stack: [key, value]
+/// Output Stack: []
 #define macro STORE_ELEMENT(mem_offset) = takes(2) returns(0) {
-    // Input stack: [key, value]
-    GET_SLOT_FROM_KEY(<mem_offset>)    // [slot, value]
-    sstore                          // []
+    GET_SLOT_FROM_KEY(<mem_offset>)     // [slot, value]
+    sstore                              // []
 }
 
+/// @dev Given a key, salt, and a value, store the value in the key's corresponding storage slot.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input Stack: [key, salt, value]
+/// Output Stack: []
 #define macro STORE_ELEMENT_FROM_KEYS(mem_offset) = takes(2) returns (0) {
-    // Input stack: [key1, key2, value]
-    GET_SLOT_FROM_KEYS(<mem_offset>) // [slot, value]
-    sstore                      // []
+    GET_SLOT_FROM_KEYS(<mem_offset>)    // [slot, value]
+    sstore                              // []
 }
+
+#define macro STORE_BYTES_ELEMENTS_FROM_KEYS(mem_offset, mem_ptr) = takes(2) returns (0) {}
