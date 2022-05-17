@@ -2,12 +2,15 @@
     Macros that enable you to use arbitrarily lengthed data.
 */
 
-// Given an offset that points to a location in calldata, store the input in memory at the mem_offset.
-// This macro will also return the mem_offset incremented by the size of the input, as well as the length of the data (including the 32 bytes used for the length).
+/// @dev Given the location of a bytes argument in calldata, store the input in memory at the mem_offset.
+/// Note that this will work for any arbitrary-sized data type, including bytes, arrays, and strings.
+// Explanation on how bytes are encoded in calldata https://docs.soliditylang.org/en/develop/abi-spec.html#use-of-dynamic-types
+/// @param cd_offset The location of the bytes argument in calldata. This is really just a pointer to the beginning of the bytes.
+/// @param mem_offset The location in memory where the bytes should be stored.
+/// Input stack: []
+/// Output stack: [new_mem_offset, word_length]
 #define macro READ_BYTES_FROM_CALLDATA(cd_offset, mem_offset) = takes(0) returns (2) {
-    // Input stack: []
     // Read the length from calldata and store it in memory.
-    // Explanation on how bytes are encoded in calldata https://docs.soliditylang.org/en/develop/abi-spec.html#use-of-dynamic-types
     cd_offset calldataload  // [offset]
     0x04 add                // [actual_offset]
     calldataload            // [length]
