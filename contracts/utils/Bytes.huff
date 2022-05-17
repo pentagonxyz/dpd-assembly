@@ -3,7 +3,7 @@
 */
 
 // Given an offset that points to a location in calldata, store the input in memory at the mem_offset.
-// This macro will also return the mem_offset incremented by the size of the input, as well as the length of the data (excluding the 32 bytes used to give the length).
+// This macro will also return the mem_offset incremented by the size of the input, as well as the length of the data (including the 32 bytes used for the length).
 #define macro READ_BYTES_FROM_CALLDATA(cd_offset, mem_offset) = takes(0) returns (2) {
     // Input stack: []
     // Read the length from calldata and store it in memory.
@@ -43,8 +43,10 @@
     break:
         // Input stack: [length, length]
         // i and length are the same, so are stack is just [length, length]
-        0x20 mul            // [length*32, length]
-        0x32 add            // [(length + 1)*32, length]
-        <mem_offset> add    // [mem_offset + (length+1)*32, length]
-        
+        // Return the mem_offset incremented by the size of the input and the length of the data (including the 32 bytes used to represent the length).
+        0x01 add            // [length+1, length]
+        swap1               // [length, length+1]
+        0x20 mul            // [length*32, length+1]
+        0x32 add            // [(length + 1)*32, length+1]
+        <mem_offset> add    // [mem_offset + (length+1)*32, length+1]
 }
