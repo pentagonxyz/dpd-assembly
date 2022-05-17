@@ -6,7 +6,7 @@
 /// Note that this will work for any arbitrary-sized data type, including bytes, arrays, and strings.
 // Explanation on how bytes are encoded in calldata https://docs.soliditylang.org/en/develop/abi-spec.html#use-of-dynamic-types
 /// @param cd_offset The location of the bytes argument in calldata. This is really just a pointer to the beginning of the bytes.
-/// @param mem_offset The location in memory where the bytes should be stored.
+/// @param mem_offset The offset in memory where the data should be stored.
 /// Input stack: []
 /// Output stack: [new_mem_offset, word_length]
 #define macro READ_BYTES_FROM_CALLDATA(cd_offset, mem_offset) = takes(0) returns (2) {
