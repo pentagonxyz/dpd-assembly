@@ -71,4 +71,79 @@
     sstore                              // []
 }
 
-#define macro STORE_BYTES_ELEMENTS_FROM_KEYS(mem_offset, mem_ptr) = takes(2) returns (0) {}
+/// @dev Given a key, store a value (>32 bytes in length) in the key's corresponding storage slot.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// @param mem_ptr The offset in memory where the value (data to be stored) is located.
+/// Input Stack: [key]
+/// Output Stack: []
+#define macro STORE_BYTES_ELEMENTS_FROM_KEY(mem_offset, mem_ptr) = takes(1) returns (0) {
+    // Get the slot from the key and store the length of the bytes array in the slot.
+    GET_SLOT_FROM_KEY(<mem_offset>) // [slot]
+    <mem_ptr> mload                 // [length, slot]
+    dup1 dup3                       // [slot, length, length, slot]
+    sstore                          // [length, slot]
+    
+    // Read the bytes array from memory and store each element to memory.
+    0x00    // [i, length, slot]
+    loop:
+        // Ensure that i is less than the length of the bytes array.
+        dup2 dup2   // [i, length, i, length, slot]
+        eq          // [i==length, i, length, slot]
+        break jumpi // [i, length, slot]
+
+        // Read the element from memory and store it in storage.
+        0x01 add                            // [i+1, length, slot]
+        dup1                                // [i+1, i+1, length, slot]
+        0x20 mul                            // [32*(i+1), i+1, length, slot]
+        <mem_ptr>                           // [mem_ptr, 32*(i+1), i+1, length, slot]
+        add                                 // [new_mem_ptr, i+1, length, slot]
+        mload                               // [element, i+1, length, slot]
+        swap2                               // [length, i+1, element, slot]
+        dup4                                // [slot, length, i+1, element, slot]
+        dup3                                // [i+1, slot, length, i+1, element, slot]
+        swap1                               // [slot, i+1, length, i+1, element, slot]
+        GET_SLOT_FROM_KEYS(<mem_offset>)    // [new_slot, length, i+1, element, slot]
+        swap1 swap3 swap1                   // [new_slot, element, i+1, length, slot]
+        sstore                              // [i+1, length, slot]
+        loop jump                           // [i+1, length, slot]
+
+    break:
+}
+
+/// @dev Store a bytes value in storage. 
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// @param mem_ptr The offset in memory where the value (data to be stored) is located.
+/// Input Stack: [key, salt]
+#define macro STORE_BYTES_ELEMENTS_FROM_KEYS(mem_offset, mem_ptr) = takes(2) returns (0) {
+    // Get the slot from the key and store the length of the bytes array in the slot.
+    GET_SLOT_FROM_KEYS(<mem_offset>) // [slot]
+    <mem_ptr> mload                 // [length, slot]
+    dup1 dup3                       // [slot, length, length, slot]
+    sstore                          // [length, slot]
+    
+    // Read the bytes array from memory and store each element to memory.
+    0x00    // [i, length, slot]
+    loop:
+        // Ensure that i is less than the length of the bytes array.
+        dup2 dup2   // [i, length, i, length, slot]
+        eq          // [i==length, i, length, slot]
+        break jumpi // [i, length, slot]
+
+        // Read the element from memory and store it in storage.
+        0x01 add                            // [i+1, length, slot]
+        dup1                                // [i+1, i+1, length, slot]
+        0x20 mul                            // [32*(i+1), i+1, length, slot]
+        <mem_ptr>                           // [mem_ptr, 32*(i+1), i+1, length, slot]
+        add                                 // [new_mem_ptr, i+1, length, slot]
+        mload                               // [element, i+1, length, slot]
+        swap2                               // [length, i+1, element, slot]
+        dup4                                // [slot, length, i+1, element, slot]
+        dup3                                // [i+1, slot, length, i+1, element, slot]
+        swap1                               // [slot, i+1, length, i+1, element, slot]
+        GET_SLOT_FROM_KEYS(<mem_offset>)    // [new_slot, length, i+1, element, slot]
+        swap1 swap3 swap1                   // [new_slot, element, i+1, length, slot]
+        sstore                              // [i+1, length, slot]
+        loop jump                           // [i+1, length, slot]
+
+    break:
+}
