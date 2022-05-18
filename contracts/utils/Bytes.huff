@@ -11,11 +11,11 @@
 /// Output stack: [new_mem_offset, word_length]
 #define macro READ_BYTES_FROM_CALLDATA(cd_offset, mem_offset) = takes(0) returns (2) {
     // Read the length from calldata and store it in memory.
-    cd_offset calldataload  // [offset]
-    0x04 add                // [actual_offset]
-    calldataload            // [length]
-    dup1                    // [length, length]
-    mem_offset mstore       // [length]
+    <cd_offset> calldataload    // [offset]
+    0x04 add                    // [actual_offset]
+    calldataload                // [length]
+    dup1                        // [length, length]
+    <mem_offset> mstore         // [length]
 
 
     // Input stack: [length]
@@ -29,16 +29,16 @@
         break jumpi // [i, length]
 
         // Read from the array and store it to memory.
-        0x01 add        // [i+1, length]
-        dup1            // [i+1, i+1, length]
-        0x20 mul        // [(i+1)*32, i+1, length]
-        dup1            // [(i+1)*32, (i+1)*32, i+1, length]
-        <cd_offset>     // [cd_offset, (i+1)*32, (i+1)*32, i+1, length]
-        add             // [new_cd_offset, (i+1)*32, i+1, length]
-        calldataload    // [data, (i+1)*32, i+1, length]
-        swap1           // [(i+1)*32, data, i+1, length]
-        mem_offset add  // [new_mem_offset, data, i+1, length] 
-        mstore          // [i+1, length]
+        0x01 add            // [i+1, length]
+        dup1                // [i+1, i+1, length]
+        0x20 mul            // [(i+1)*32, i+1, length]
+        dup1                // [(i+1)*32, (i+1)*32, i+1, length]
+        <cd_offset>         // [cd_offset, (i+1)*32, (i+1)*32, i+1, length]
+        add                 // [new_cd_offset, (i+1)*32, i+1, length]
+        calldataload        // [data, (i+1)*32, i+1, length]
+        swap1               // [(i+1)*32, data, i+1, length]
+        <mem_offset> add    // [new_mem_offset, data, i+1, length] 
+        mstore              // [i+1, length]
 
         // Jump to the start of the loop.
         loop jump
