@@ -41,11 +41,35 @@
 #define constant DPD_OWNER_MAP_SLOT = FREE_STORAGE_POINTER()
 #define constant DPD_UPDATER_MAP_SLOT = FREE_STORAGE_POINTER()
 
+
 /* DPD Initialization */
 #define macro ADD_DPD() = takes(0) returns (0) {
     // Note that the length is updated after the DPD is added.
     // The DPD_ARRAY is essentially a map that uses the current length as the key.
-    READ_BYTES_FROM_CALLDATA(0x04, 0x00)   // [length*32, length]
+    // We store the CID at 0x40 to make room for data to be stored before hashing.
+    READ_BYTES_FROM_CALLDATA(0x04, 0x40)        // [length*32, length]
+    [DPD_ARRAY_LENGTH_SLOT] sload               // [dpd_id, length*32, length]
+    dup1                                        // [dpd_id, dpd_id, length*32, length]
+    [DPD_ARRAY_SLOT]                            // [salt, dpd_id, dpd_id, length*32, length]  
+    STORE_BYTES_ELEMENTS_FROM_KEYS(0x00, 0x40)  // [dpd_id, length*32, length]
+
+    // Store the address of the owner.
+    0x24 calldataload                           // [owner, dpd_id, length*32, length]
+    dup2                                        // [dpd_id, owner, dpd_io, length*32, length]
+    [DPD_OWNER_MAP_SLOT]                        // [salt, dpd_id, owner, dpd_io, length*32, length]
+    STORE_ELEMENT_FROM_KEYS(0x00)               // [dpd_id, length*32, length]
+    
+    // Store the address of the updater.
+    0x44 calldataload                           // [updater, dpd_id, length*32, length]
+    dup2                                        // [dpd_id, updater, dpd_id, length*32, length]
+    [DPD_UPDATER_MAP_SLOT]                      // [salt, dpd_id, updater, dpd_id, length*32, length]     
+    STORE_ELEMENT_FROM_KEYS(0x00)               // [dpd_id, length*32, length]
+
+    // Incremement the DPD array length.
+    // Input Stack: [dpd_id]
+    0x01 add                // [dpd_id+1]
+    [DPD_ARRAY_LENGTH_SLOT] // [dpd_array_length, dpd_id+1]
+    sstore                  // []
 }
 
 /* Main Macro */
