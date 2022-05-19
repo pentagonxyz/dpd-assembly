@@ -41,6 +41,42 @@
 #define constant DPD_OWNER_MAP_SLOT = FREE_STORAGE_POINTER()
 #define constant DPD_UPDATER_MAP_SLOT = FREE_STORAGE_POINTER()
 
+/* View Functions */
+#define macro GET_DPD_DATA() = takes(0) returns (0) {
+    0x04 calldataload                           // [dpd_id]
+    [DPD_ARRAY_SLOT]                            // [salt, dpd_id]
+    LOAD_BYTES_ELEMENT_FROM_KEYS(0x00, 0x40)    // []
+    0x40 mload 0x20 mul                         // [bytes_length]
+    0x40                                        // [offset, bytes_length]
+    return                                      // []
+}
+
+#define macro GET_DPD_OWNER() = takes(0) returns (0) {
+    0x04 calldataload                           // [dpd_id]
+    [DPD_OWNER_MAP_SLOT]                        // [salt, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)                // [owner]
+    0x00 mstore                                 // [] 
+    0x20 0x00                                   // [32, 0]
+    return                                      // []
+}
+
+#define macro GET_DPD_UPDATER() = takes(0) returns (0) {
+    0x04 calldataload                           // [dpd_id]
+    [DPD_UPDATER_MAP_SLOT]                      // [salt, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)                // [owner]
+    0x00 mstore                                 // [] 
+    0x20 0x00                                   // [32, 0]
+    return                                      // []
+}
+
+#define macro GET_DPD_VERSION() = takes(0) returns (0) {
+    0x04 calldataload                           // [dpd_id]
+    [VERSION_MAP_SLOT]                          // [salt, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)                // [owner]
+    0x00 mstore                                 // [] 
+    0x20 0x00                                   // [32, 0]
+    return                                      // []
+}
 
 /* DPD Initialization */
 #define macro ADD_DPD() = takes(0) returns (0) {
