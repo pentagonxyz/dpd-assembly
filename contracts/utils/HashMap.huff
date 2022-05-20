@@ -187,14 +187,16 @@
         <mem_ptr> add                       // [new_mem_pointer, element, i, length, slot]
         mstore                              // [i, length, slot]
 
+
         // Increment the loop counter.
         0x01 add                            // [i+1, length, slot]
-        dup2 dup2 eq iszero                 // [length!=i+1, length, i+1, slot]
+        dup2 dup2 lt                        // [i+1, length, i+1, slot]
         loop jumpi                          // [length, i+1, slot]
 
     // Remove uneeded values from the stack, leaving only the length.
     // Multiply the length by 32.
+
     swap2                                   // [slot, i+1, length]
-    pop pop pop                             // [length]
+    pop
     0x20 mul                                // [length*32]
 }

@@ -34,5 +34,5 @@
 
     // Return the new memory offset.
     pop 0x20 mul        // [bytes_length]
-    <mem_ptr> add    // [new_mem_ptr]
+    <mem_ptr> add       // [new_mem_ptr]
 }

@@ -43,30 +43,19 @@
 
 /* View Functions */
 #define macro GET_DPD_DATA() = takes(0) returns (0) {
-    0x20 0x40 mstore                                // []
-
+    // Retrieve the data from storage.
     0x04 calldataload                           // [dpd_id]
     [DPD_ARRAY_SLOT]                            // [salt, dpd_id]
-    LOAD_BYTES_ELEMENT_FROM_KEYS(0x00, 0x80)    // [bytes_length]
-
-    0x20 0x60 mstore                             // []
+    LOAD_BYTES_ELEMENT_FROM_KEYS(0x00, 0x40)    // [bytes_length]
 
 
-    // // Setup memory for returning our bytes array (DPD data).
-    // 0x20 0x40 mstore                            // []
-    
-    // 0x04 calldataload                           // [dpd_id]
-    // [DPD_ARRAY_SLOT]                            // [salt, dpd_id]
-    // // LOAD_BYTES_ELEMENT_FROM_KEYS(0x00, 0x80) // [bytes_length]
-    // 0x0123 0x80 mstore 0x20                     // [bytes length]
-    
-    // dup1                                        // [bytes_length, bytes_length]
-    // 0x60                                        // [96, 0x60]
-    // mstore                                      // [bytes_length] 
+    // Setup memory to return the data.
+    0x32 0x20 mstore                            // [bytes_length]
+    dup1 0x40 mstore                            // [bytes_length]
+    0x40 add                                    // [full_bytes_length]
 
-    // add 0x40                                    // [bytes_length + 64]
-    // 0x40                                        // [offset, bytes_length+64]
-    // return                                      // []
+    0x20                                        // [32, full_bytes_length]
+    return                                      // []
 }
 
 #define macro GET_DPD_OWNER() = takes(0) returns (0) {
