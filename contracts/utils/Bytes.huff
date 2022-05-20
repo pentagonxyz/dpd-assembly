@@ -8,48 +8,31 @@
 /// @param cd_offset The location of the bytes argument in calldata. This is really just a pointer to the beginning of the bytes.
 /// @param mem_offset The offset in memory where the data should be stored.
 /// Input stack: []
-/// Output stack: [new_mem_offset, word_length]
-#define macro READ_BYTES_FROM_CALLDATA(cd_offset, mem_offset) = takes(0) returns (2) {
-    // Read the length from calldata and store it in memory.
-    <cd_offset> calldataload    // [offset]
-    0x04 add                    // [actual_offset]
-    calldataload                // [length]
+/// Output stack: [new_mem_offset]
+#define macro READ_BYTES_FROM_CALLDATA(cd_offset, mem_offset) = takes(0) returns (1) {
+    // Read the length of the byte array and store it in memory.
+    <cd_offset> calldataload    // [cd_offset]
+    0x04 add calldataload       // [length]
     dup1                        // [length, length]
     <mem_offset> mstore         // [length]
 
-
-    // Input stack: [length]
-    // Using the length, read the bytes from calldata and store them in memory.
-    0x00            // [i, length]
+    // Iterate through the 32 byte elements in the byte array.
+    0x01        // [i, length]
     loop:
-        // Input stack: [i, length]
-        // End the loop if we have read the entire bytes array.
-        dup2 dup2   // [i, length, i, length]
-        eq          // [i == length, i, length]
-        break jumpi // [i, length]
+        dup1                // [i, i, length]
+        0x20 mul            // [32i, i, length]
+        <cd_offset> add     // [offset, i, length]
+        dup1 calldataload   // [data, offset, i, length]
+        swap1               // [offset, data, i, length]
+        <mem_offset> add    // [memory_offset, data, i, length]
+        mstore              // [i, length]
 
-        // Read from the array and store it to memory.
+        // Increment the loop counter.
         0x01 add            // [i+1, length]
-        dup1                // [i+1, i+1, length]
-        0x20 mul            // [(i+1)*32, i+1, length]
-        dup1                // [(i+1)*32, (i+1)*32, i+1, length]
-        <cd_offset>         // [cd_offset, (i+1)*32, (i+1)*32, i+1, length]
-        add                 // [new_cd_offset, (i+1)*32, i+1, length]
-        calldataload        // [data, (i+1)*32, i+1, length]
-        swap1               // [(i+1)*32, data, i+1, length]
-        <mem_offset> add    // [new_mem_offset, data, i+1, length] 
-        mstore              // [i+1, length]
+        dup2 dup2 eq iszero // [i+1!=length, i, length]
+        loop jumpi          // [i, length]
 
-        // Jump to the start of the loop.
-        loop jump
-
-    break:
-        // Input stack: [length, length]
-        // i and length are the same, so are stack is just [length, length]
-        // Return the mem_offset incremented by the size of the input and the length of the data (including the 32 bytes used to represent the length).
-        0x01 add            // [length+1, length]
-        swap1               // [length, length+1]
-        0x20 mul            // [length*32, length+1]
-        0x32 add            // [(length + 1)*32, length+1]
-        <mem_offset> add    // [mem_offset + (length+1)*32, length+1]
+    // Return the new memory offset.
+    pop                 // [length]
+    <mem_offset> add    // [new_mem_offset]
 }
