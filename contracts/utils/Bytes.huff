@@ -33,6 +33,6 @@
         loop jumpi          // [i, length]
 
     // Return the new memory offset.
-    pop                 // [length]
+    pop 0x20 mul        // [bytes_length]
     <mem_offset> add    // [new_mem_offset]
 }
