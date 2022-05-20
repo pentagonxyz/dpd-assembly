@@ -77,25 +77,24 @@
 /// Input Stack: [key]
 /// Output Stack: []
 #define macro STORE_BYTES_ELEMENTS_FROM_KEY(mem_offset, mem_ptr) = takes(1) returns (0) {
-    // Get the slot from the key and store the length in that slot.
-    GET_SLOT_FROM_KEY(<mem_offset>)     // [slot]
-    <mem_offset> mload                  // [length, slot]
-    dup1 dup3                           // [slot, length, length, slot]
-    sstore                              // [length, slot]
+    // Get the slot from the keys and store the length in that slot.
+    GET_SLOT_FROM_KEY(<mem_offset>)         // [slot]
+    <mem_ptr> mload                         // [length, slot]
+    dup1 dup3                               // [slot, length, length, slot]
+    sstore                                  // [length, slot]
 
     // Iterate through the 32 byte elements in the byte array.
     0x01                                    // [i, length, slot]
     loop:
         dup1 0x20 mul                       // [32i, i, length, slot]
-        dup1                                // [32i, 32i, i, length, slot]
-        <mem_ptr> add                       // [new_mem_pointer, 32i, i, length, slot]
-        mload                               // [element, 32i, i, length, slot]
-        swap2                               // [i, 32i, element, length, slot]
-        dup1 dup6                           // [slot, i, i, 32i, element, length, slot]
-        GET_SLOT_FROM_KEYS(<mem_offset>)    // [element_slot, i, 32i, element, length, slot]
-        swap1 swap3 swap1                   // [element_slot, element, 32i, i, length, slot]
-        sstore                              // [32i, i, length, slot]
-        pop                                 // [i, length, slot]
+        <mem_ptr> add                       // [new_mem_pointer, i, length, slot]
+        mload                               // [element, i, length, slot]
+        dup2                                // [i, element, i, length, slot]
+        dup4                                // [slot, i, element, i, length, slot]
+        GET_SLOT_FROM_KEYS(<mem_offset>)    // [element_slot, element, i, length, slot]
+        sstore                              // [i, length, slot]
+
+        // Increment the loop counter.
         0x01 add                            // [i+1, length, slot]
         dup2 dup2 eq iszero                 // [length!=i+1, length, i+1, slot]
         loop jumpi                          // [length, i+1, slot]
@@ -110,24 +109,23 @@
 /// Output Stack: []
 #define macro STORE_BYTES_ELEMENTS_FROM_KEYS(mem_offset, mem_ptr) = takes(2) returns (0) {
     // Get the slot from the keys and store the length in that slot.
-    GET_SLOT_FROM_KEYS(<mem_offset>)     // [slot]
-    <mem_ptr> mload                  // [length, slot]
-    dup1 dup3                           // [slot, length, length, slot]
-    sstore                              // [length, slot]
+    GET_SLOT_FROM_KEYS(<mem_offset>)        // [slot]
+    <mem_ptr> mload                         // [length, slot]
+    dup1 dup3                               // [slot, length, length, slot]
+    sstore                                  // [length, slot]
 
     // Iterate through the 32 byte elements in the byte array.
     0x01                                    // [i, length, slot]
     loop:
         dup1 0x20 mul                       // [32i, i, length, slot]
-        dup1                                // [32i, 32i, i, length, slot]
-        <mem_ptr> add                       // [new_mem_pointer, 32i, i, length, slot]
-        mload                               // [element, 32i, i, length, slot]
-        swap2                               // [i, 32i, element, length, slot]
-        dup1 dup6                           // [slot, i, i, 32i, element, length, slot]
-        GET_SLOT_FROM_KEYS(<mem_offset>)    // [element_slot, i, 32i, element, length, slot]
-        swap1 swap3 swap1                   // [element_slot, element, 32i, i, length, slot]
-        sstore                              // [32i, i, length, slot]
-        pop                                 // [i, length, slot]
+        <mem_ptr> add                       // [new_mem_pointer, i, length, slot]
+        mload                               // [element, i, length, slot]
+        dup2                                // [i, element, i, length, slot]
+        dup4                                // [slot, i, element, i, length, slot]
+        GET_SLOT_FROM_KEYS(<mem_offset>)    // [element_slot, element, i, length, slot]
+        sstore                              // [i, length, slot]
+
+        // Increment the loop counter.
         0x01 add                            // [i+1, length, slot]
         dup2 dup2 eq iszero                 // [length!=i+1, length, i+1, slot]
         loop jumpi                          // [length, i+1, slot]
@@ -143,7 +141,14 @@
 #define macro LOAD_BYTES_ELEMENT_FROM_KEY(mem_offset, mem_ptr) = takes(1) returns (1) {
     // Get the slot from the key and retrieve the length from it.
     GET_SLOT_FROM_KEY(<mem_offset>)     // [slot]
-    <mem_ptr> mload                  // [length, slot]
+    <mem_ptr> mload                     // [length, slot]
+
+    // Iterate through the 32 byte elements in the byte array.
+    0x01                                // [i, length, slot]
+    loop:
+        dup1 0x20 mul                   // [32i, i, length, slot]
+
+
 }
 
 /// @dev Retrieve a bytes value from storage using two keys.
