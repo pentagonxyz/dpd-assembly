@@ -2,19 +2,19 @@
     Macros that enable you to use arbitrarily lengthed data.
 */
 
-/// @dev Given the location of a bytes argument in calldata, store the input in memory at the mem_offset.
+/// @dev Given the location of a bytes argument in calldata, store the input in memory at the mem_ptr.
 /// Note that this will work for any arbitrary-sized data type, including bytes, arrays, and strings.
 // Explanation on how bytes are encoded in calldata https://docs.soliditylang.org/en/develop/abi-spec.html#use-of-dynamic-types
 /// @param cd_offset The location of the bytes argument in calldata. This is really just a pointer to the beginning of the bytes.
-/// @param mem_offset The offset in memory where the data should be stored.
+/// @param mem_ptr The offset in memory where the data should be stored.
 /// Input stack: []
-/// Output stack: [new_mem_offset]
-#define macro READ_BYTES_FROM_CALLDATA(cd_offset, mem_offset) = takes(0) returns (1) {
+/// Output stack: [new_mem_ptr]
+#define macro READ_BYTES_FROM_CALLDATA(cd_offset, mem_ptr) = takes(0) returns (1) {
     // Read the length of the byte array and store it in memory.
     <cd_offset> calldataload    // [cd_offset]
     0x04 add calldataload       // [length]
     dup1                        // [length, length]
-    <mem_offset> mstore         // [length]
+    <mem_ptr> mstore         // [length]
 
     // Iterate through the 32 byte elements in the byte array.
     0x01        // [i, length]
@@ -24,7 +24,7 @@
         <cd_offset> add     // [offset, i, length]
         dup1 calldataload   // [data, offset, i, length]
         swap1               // [offset, data, i, length]
-        <mem_offset> add    // [memory_offset, data, i, length]
+        <mem_ptr> add    // [memory_offset, data, i, length]
         mstore              // [i, length]
 
         // Increment the loop counter.
@@ -34,5 +34,5 @@
 
     // Return the new memory offset.
     pop 0x20 mul        // [bytes_length]
-    <mem_offset> add    // [new_mem_offset]
+    <mem_ptr> add    // [new_mem_ptr]
 }

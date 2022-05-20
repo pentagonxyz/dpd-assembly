@@ -109,9 +109,9 @@
 /// Input Stack: [key, salt]
 /// Output Stack: []
 #define macro STORE_BYTES_ELEMENTS_FROM_KEYS(mem_offset, mem_ptr) = takes(2) returns (0) {
-    // Get the slot from the key and store the length in that slot.
+    // Get the slot from the keys and store the length in that slot.
     GET_SLOT_FROM_KEYS(<mem_offset>)     // [slot]
-    <mem_offset> mload                  // [length, slot]
+    <mem_ptr> mload                  // [length, slot]
     dup1 dup3                           // [slot, length, length, slot]
     sstore                              // [length, slot]
 
@@ -141,7 +141,9 @@
 /// Input Stack: [key]
 /// Output Stack: [bytes_length]
 #define macro LOAD_BYTES_ELEMENT_FROM_KEY(mem_offset, mem_ptr) = takes(1) returns (1) {
-
+    // Get the slot from the key and retrieve the length from it.
+    GET_SLOT_FROM_KEY(<mem_offset>)     // [slot]
+    <mem_ptr> mload                  // [length, slot]
 }
 
 /// @dev Retrieve a bytes value from storage using two keys.
