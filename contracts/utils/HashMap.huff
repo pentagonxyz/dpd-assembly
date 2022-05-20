@@ -144,6 +144,11 @@
         swap1                               // [slot, i+1, length, i+1, element, slot]
         GET_SLOT_FROM_KEYS(<mem_offset>)    // [new_slot, length, i+1, element, slot]
         swap1 swap3 swap1                   // [new_slot, element, i+1, length, slot]
+
+        0x10
+        0x00 mstore
+        0x20 0x00 revert
+
         sstore                              // [i+1, length, slot]
         loop jump                           // [i+1, length, slot]
 
@@ -154,6 +159,8 @@
 /// @dev Retrieve a bytes value from storage using a single key.
 /// @param mem_offset The offset in memory where the raw data will be stored before hashing.
 /// @param mem_ptr The offset in memory where the data will be stored.
+/// Input Stack: [key]
+/// Output Stack: [bytes_length]
 #define macro LOAD_BYTES_ELEMENT_FROM_KEY(mem_offset, mem_ptr) = takes(1) returns (1) {
     // Get the slot from the key and store the length of the bytes array in the slot.
     GET_SLOT_FROM_KEY(<mem_offset>) dup1    // [slot, slot]
@@ -182,12 +189,15 @@
         loop jump                           // [i+1, length, slot]
 
     break:
-        pop pop pop
+        pop swap1 pop                       // [length]
+        0x20 mul                            // [32*length]
 }
 
 /// @dev Retrieve a bytes value from storage using two keys.
 /// @param mem_offset The offset in memory where the raw data will be stored before hashing.
 /// @param mem_ptr The offset in memory where the data will be stored.
+/// Input Stack: [key, salt]
+/// Output Stack: [bytes_length]
 #define macro LOAD_BYTES_ELEMENT_FROM_KEYS(mem_offset, mem_ptr) = takes(2) returns (1) {
     // Get the slot from the key and store the length of the bytes array in the slot.
     GET_SLOT_FROM_KEYS(<mem_offset>) dup1   // [slot, slot]
@@ -216,5 +226,6 @@
         loop jump                           // [i+1, length, slot]
 
     break:
-        pop pop pop
+        pop swap1 pop                       // [length]
+        0x20 mul                            // [32*length]
 }
