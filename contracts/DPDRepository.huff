@@ -4,7 +4,7 @@
 #include "./contracts/utils/Bytes.huff"
 
 /* Interface */
-#define function dpds(uint256) view returns(bytes)
+#define function dpds(uint256) view returns(bytes32)
 #define function updaters(uint256) view returns(address)
 #define function versions(uint256) view returns(uint256)
 
@@ -44,18 +44,13 @@
 /* View Functions */
 #define macro GET_DPD_DATA() = takes(0) returns (0) {
     // Retrieve the data from storage.
-    0x04 calldataload                           // [dpd_id]
-    [DPD_ARRAY_SLOT]                            // [salt, dpd_id]
-    LOAD_BYTES_ELEMENT_FROM_KEYS(0x00, 0x40)    // [bytes_length]
+    0x04 calldataload               // [dpd_id]
+    [DPD_ARRAY_SLOT]                // [slot, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)    // [data]
 
-
-    // Setup memory to return the data.
-    0x32 0x20 mstore                            // [bytes_length]
-    dup1 0x40 mstore                            // [bytes_length]
-    0x40 add                                    // [full_bytes_length]
-
-    0x20                                        // [32, full_bytes_length]
-    return                                      // []
+    // Return the data
+    0x00 mstore                     // []
+    0x20 0x00 return                // []
 }
 
 #define macro GET_DPD_OWNER() = takes(0) returns (0) {
@@ -88,13 +83,15 @@
 /* DPD Initialization */
 #define macro ADD_DPD() = takes(0) returns (0) {
     // Note that the length is updated after the DPD is added.
-    // The DPD_ARRAY is essentially a map that uses the current length as the key.
-    // We store the CID at 0x40 to make room for data to be stored before hashing.
-    READ_BYTES_FROM_CALLDATA(0x04, 0x40)        // [length*32, length]
-    [DPD_ARRAY_LENGTH_SLOT] sload               // [dpd_id, length*32, length]
-    dup1                                        // [dpd_id, dpd_id, length*32, length]
-    [DPD_ARRAY_SLOT]                            // [salt, dpd_id, dpd_id, length*32, length]  
-    STORE_BYTES_ELEMENTS_FROM_KEYS(0x00, 0x40)  // [dpd_id, length*32, length]
+
+    // Get the DPD array length, which serves as the DPD ID.
+    [DPD_ARRAY_LENGTH_SLOT] sload             // [dpd_id]
+
+    // Store the DPD data.
+    0x04 calldataload                           // [data, dpd_id]
+    dup2                                        // [dpd_id, data, dpd_id]
+    [DPD_ARRAY_SLOT]                            // [salt, dpd_id, data, dpd_id]
+    STORE_ELEMENT_FROM_KEYS(0x00)               // [dpd_id]
 
     // Store the address of the owner.
     0x24 calldataload                           // [owner, dpd_id, length*32, length]
