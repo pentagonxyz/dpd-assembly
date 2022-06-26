@@ -1,27 +1,44 @@
-# <h1 align="center"> Hardhat Huff Template </h1>
+# <h1 align="center"> Huff Project Template </h1>
 
-** Template for getting started with Huff **
+**Template repository for getting started quickly with Huff projects using Foundry**
 
-## Setup
-
-```sh
-git clone https://github.com/JetJadeja/huff-project-template.git
-cd huff-project-template
-npm i
+```
+                                        .&%@&&&&&&
+                                    ,..&&&@&&&&&@
+                                    @&*&&&&@&&&&@&&
+                                    &&&&&& @&&&&&&&@
+                                    &&&&&%&&&&&&&&&&&
+                                    &&&&&&&&&   &&&&,
+                                    &@&&&&&&&&@(
+                                    .&/&&&&&&&@&&&
+                                        &&&&&&&&&&& &@
+                                        &&&&&&&&&&&&
+                                        @&&&&&&&&&/
+                                        &&&&&&&&&
+                                        &&&&&&&&&&&&&
+                                    /&&&&&&&&&&&@&&&@@
+                                ██   ██ ██    ██ ███████ ███████
+                                ██   ██ ██    ██ ██      ██
+                                ███████ ██    ██ █████   █████
+                                ██   ██ ██    ██ ██      ██
+                                ██   ██  ██████  ██      ██
 ```
 
-### Building and Testing
+## Getting Started
 
-To compile your contracts, write:
+Click "Use this template" on [GitHub](https://github.com/huff-language/huff-project-template) to create a new repository with this repo as the initial state.
 
-```sh
-npx hardhat compile
+Once you've cloned and entered into your repository, you need to install the necessary dependencies. In order to do so, simply run:
+
+```shell
+make
 ```
 
-To test your contracts, write:
+To build and test your contracts, you can run:
 
-```sh
-npx hardhat test
+```shell
+forge build
+forge test
 ```
 
-For more advanced Hardhat usage, please check the [Hardhat documentation](https://hardhat.org/getting-started/).
+For more information on how to use Foundry, check out the [Foundry Github Repository](https://github.com/foundry-rs/foundry/tree/master/forge) and the [foundry-huff library repository](https://github.com/huff-language/foundry-huff).
