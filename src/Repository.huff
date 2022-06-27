@@ -107,9 +107,16 @@
 
     // Incremement the DPD array length.
     // Input Stack: [dpd_id]
-    0x01 add                // [dpd_id+1]
-    [DPD_ARRAY_LENGTH_SLOT] // [dpd_array_length, dpd_id+1]
-    sstore                  // []
+    [DPD_ARRAY_LENGTH_SLOT] // [slot, dpd_id]
+    dup2                    // [dpd_id, slot, dpd_id]                
+    0x01                    // [new_dpd_id, slot, dpd_id]
+    swap1                   // [slot, new_dpd_id, dpd_id]
+    sstore                  // [dpd_id]
+
+    // Return the DPD_ID.
+    0x00 mstore // []
+    0x20 0x00   // [slot, length]
+    return      // []
 }
 
 /* Main Macro */
