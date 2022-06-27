@@ -1,3 +1,0 @@
-[default]
-ffi = true
-fuzz-runs=10_000
