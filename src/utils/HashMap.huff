@@ -1,0 +1,202 @@
+/* 
+    Macros that enable you to store data in a hashmap.
+*/
+
+/// @dev Hash a piece of data, representing a key, to generate the storage slot that the data will be located.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input stack: [key]
+/// Output stack: [slot]
+#define macro GET_SLOT_FROM_KEY(mem_offset) = takes(1) returns (1) {
+    // Load the data into memory and hash it, while preserving the memory location.
+    <mem_offset>    // [<mem_offset>, key]
+    mstore          // []
+    
+    // Hash the data, generating a key.
+    0x20            // [32]
+    <mem_offset>    // [<mem_offset>, 32]
+    sha3            // [slot]
+}
+
+/// @dev Hash two pieces of data, representing a key and a salt, to generate the storage slot that the data will be located.
+/// Note that using a salt when hashing keys is essential when your map has multiple maps.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input stack: [key, salt]
+/// Output stack: [slot]
+#define macro GET_SLOT_FROM_KEYS(mem_offset) = takes(2) returns (1) {
+    // Load the data into memory.
+    <mem_offset>            // [<mem_offset>, key1, salt]
+    mstore                  // [salt]
+    <mem_offset> 0x20 add   // [<mem_offset> + 32, salt]
+    mstore                  // []
+    
+    // Hash the data, generating a key.
+    0x40                    // [64]
+    <mem_offset>            // [<mem_offset>, 64]
+    sha3                    // [slot]
+}
+
+/// @dev Given a key, load it's value from storage.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input stack: [key]
+/// Output stack: [value]
+#define macro LOAD_ELEMENT(mem_offset) = takes(1) returns(1) {
+    GET_SLOT_FROM_KEY(<mem_offset>)     // [slot]
+    sload                               // [value]
+}
+
+/// @dev Given a key and a salt, load their corresponding value from storage.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input stack: [key, salt]
+/// Output stack: [value]
+#define macro LOAD_ELEMENT_FROM_KEYS(mem_offset) = takes(2) returns(1) {
+    GET_SLOT_FROM_KEYS(<mem_offset>) // [slot]
+    sload                            // [value]
+}
+
+/// @dev Given a key and a value, store the value in the key's corresponding storage slot.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input Stack: [key, value]
+/// Output Stack: []
+#define macro STORE_ELEMENT(mem_offset) = takes(2) returns(0) {
+    GET_SLOT_FROM_KEY(<mem_offset>)     // [slot, value]
+    sstore                              // []
+}
+
+/// @dev Given a key, salt, and a value, store the value in the key's corresponding storage slot.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// Input Stack: [key, salt, value]
+/// Output Stack: []
+#define macro STORE_ELEMENT_FROM_KEYS(mem_offset) = takes(3) returns (0) {
+    GET_SLOT_FROM_KEYS(<mem_offset>)    // [slot, value]
+    sstore                              // []
+}
+
+/// @dev Given a key, store a value (>32 bytes in length) in the key's corresponding storage slot.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// @param mem_ptr The offset in memory where the value (data to be stored) is located.
+/// Input Stack: [key]
+/// Output Stack: []
+#define macro STORE_BYTES_ELEMENTS_FROM_KEY(mem_offset, mem_ptr) = takes(1) returns (0) {
+    // Get the slot from the keys and store the length in that slot.
+    GET_SLOT_FROM_KEY(<mem_offset>)         // [slot]
+    <mem_ptr> mload                         // [length, slot]
+    dup1 dup3                               // [slot, length, length, slot]
+    sstore                                  // [length, slot]
+
+    // Iterate through the 32 byte elements in the byte array.
+    0x01                                    // [i, length, slot]
+    loop:
+        dup1 0x20 mul                       // [32i, i, length, slot]
+        <mem_ptr> add                       // [new_mem_pointer, i, length, slot]
+        mload                               // [element, i, length, slot]
+        dup2                                // [i, element, i, length, slot]
+        dup4                                // [slot, i, element, i, length, slot]
+        GET_SLOT_FROM_KEYS(<mem_offset>)    // [element_slot, element, i, length, slot]
+        sstore                              // [i, length, slot]
+
+        // Increment the loop counter.
+        0x01 add                            // [i+1, length, slot]
+        dup2 dup2 eq iszero                 // [length!=i+1, length, i+1, slot]
+        loop jumpi                          // [length, i+1, slot]
+
+    pop pop pop
+}
+
+/// @dev Store a bytes value in storage. 
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// @param mem_ptr The offset in memory where the value (data to be stored) is located.
+/// Input Stack: [key, salt]
+/// Output Stack: []
+#define macro STORE_BYTES_ELEMENTS_FROM_KEYS(mem_offset, mem_ptr) = takes(2) returns (0) {
+    // Get the slot from the keys and store the length in that slot.
+    GET_SLOT_FROM_KEYS(<mem_offset>)        // [slot]
+    <mem_ptr> mload                         // [length, slot]
+    dup1 dup3                               // [slot, length, length, slot]
+    sstore                                  // [length, slot]
+
+    // Iterate through the 32 byte elements in the byte array.
+    0x01                                    // [i, length, slot]
+    loop:
+        dup1 0x20 mul                       // [32i, i, length, slot]
+        <mem_ptr> add                       // [new_mem_pointer, i, length, slot]
+        mload                               // [element, i, length, slot]
+        dup2                                // [i, element, i, length, slot]
+        dup4                                // [slot, i, element, i, length, slot]
+        GET_SLOT_FROM_KEYS(<mem_offset>)    // [element_slot, element, i, length, slot]
+        sstore                              // [i, length, slot]
+
+        // Increment the loop counter.
+        0x01 add                            // [i+1, length, slot]
+        dup2 dup2 eq iszero                 // [length!=i+1, length, i+1, slot]
+        loop jumpi                          // [length, i+1, slot]
+
+    pop pop pop
+}
+
+/// @dev Retrieve a bytes value from storage using a single key.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// @param mem_ptr The offset in memory where the data will be stored.
+/// Input Stack: [key]
+/// Output Stack: [bytes_length]
+#define macro LOAD_BYTES_ELEMENT_FROM_KEY(mem_offset, mem_ptr) = takes(1) returns (1) {
+    // Get the slot from the key and retrieve the length from it.
+    GET_SLOT_FROM_KEY(<mem_offset>)         // [slot]
+    dup1 sload                              // [length, slot]
+    
+    // Iterate through the 32 byte elements in the byte array and store them in memory.
+    0x01                                    // [i, length, slot]
+    loop:
+        dup1 dup3                           // [slot, i, i, length, slot]
+        GET_SLOT_FROM_KEYS(<mem_offset>)    // [element_slot, i, length, slot]
+        sload                               // [element, i, length, slot]
+        dup2                                // [i, element, i, length, slot]
+        0x20 mul                            // [32i, element, i, length, slot]
+        <mem_ptr> add                       // [new_mem_pointer, element, i, length, slot]
+        mstore                              // [i, length, slot]
+
+        // Increment the loop counter.
+        0x01 add                            // [i+1, length, slot]
+        dup2 dup2 eq iszero                 // [length!=i+1, length, i+1, slot]
+        loop jumpi                          // [length, i+1, slot]
+
+    // Remove uneeded values from the stack, leaving only the length.
+    // Multiply the length by 32.
+    swap2                                   // [slot, i+1, length]
+    pop pop pop                             // [length]
+    0x20 mul                                // [length*32]
+}
+
+/// @dev Retrieve a bytes value from storage using two keys.
+/// @param mem_offset The offset in memory where the raw data will be stored before hashing.
+/// @param mem_ptr The offset in memory where the data will be stored.
+/// Input Stack: [key, salt]
+/// Output Stack: [bytes_length]
+#define macro LOAD_BYTES_ELEMENT_FROM_KEYS(mem_offset, mem_ptr) = takes(2) returns (1) {
+    // Get the slot from the key and retrieve the length from it.
+    GET_SLOT_FROM_KEYS(<mem_offset>)        // [slot]
+    dup1 sload                              // [length, slot]
+    
+    // Iterate through the 32 byte elements in the byte array and store them in memory.
+    0x01                                    // [i, length, slot]
+    loop:
+        dup1 dup3                           // [slot, i, i, length, slot]
+        GET_SLOT_FROM_KEYS(<mem_offset>)    // [element_slot, i, length, slot]
+        sload                               // [element, i, length, slot]
+        dup2                                // [i, element, i, length, slot]
+        0x20 mul                            // [32i, element, i, length, slot]
+        <mem_ptr> add                       // [new_mem_pointer, element, i, length, slot]
+        mstore                              // [i, length, slot]
+
+
+        // Increment the loop counter.
+        0x01 add                            // [i+1, length, slot]
+        dup2 dup2 lt                        // [i+1, length, i+1, slot]
+        loop jumpi                          // [length, i+1, slot]
+
+    // Remove uneeded values from the stack, leaving only the length.
+    // Multiply the length by 32.
+
+    swap2                                   // [slot, i+1, length]
+    pop
+    0x20 mul                                // [length*32]
+}
