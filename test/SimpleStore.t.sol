@@ -7,24 +7,45 @@ import "forge-std/console.sol";
 
 contract SimpleStoreTest is Test {
     /// @dev Address of the SimpleStore contract.
-    SimpleStore public simpleStore;
+    Repository public repository;
 
     /// @dev Setup the testing environment.
     function setUp() public {
-        simpleStore = SimpleStore(HuffDeployer.deploy("Repository"));
+        repository = Repository(HuffDeployer.deploy("Repository"));
     }
 
-    /// @dev Ensure that you can set and get the value.
-    function testSetAndGetValue(uint256 value) public {
-        simpleStore.setValue(value);
-        console.log(value);
-        console.log(simpleStore.getValue());
-        assertEq(value, simpleStore.getValue());
+    /// @dev Ensure that you can create new DPD contracts.
+    function testDpdInitialization() external {
+        repository.addDpd(bytes32(uint256(69)), address(this), address(this));
     }
 }
 
-interface SimpleStore {
-    function setValue(uint256) external;
+interface Repository {
+    /// @notice Given a DPD id, return its CID.
+    function dpds(uint256) external view returns (bytes32);
 
-    function getValue() external returns (uint256);
+    /// @notice Given a DPD id, return its owner address.
+    function owners(uint256) external view returns (bytes32);
+
+    /// @notice Given a DPD id, return its updater address.
+    function updaters(uint256) external view returns (bytes32);
+
+    /// @notice Given a DPD id, return its current address.
+
+    /// @notice Given a CID, owner address, and updater address, initialize a new DPD.
+    function addDpd(
+        bytes32,
+        address,
+        address
+    ) external returns (uint256);
+
+    /// @notice Update a DPD CID.
+    /// @notice Can only be called by the DPD's Updater address.
+    function updateDPD(uint256, bytes32) external;
+
+    /// @notice Set a new DPD owner.
+    function setDPDOwner(uint256, address) external;
+
+    /// @notice Set a new DPD updater.
+    function setDPDUpdater(uint256, address) external;
 }
