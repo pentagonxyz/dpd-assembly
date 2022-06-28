@@ -16,7 +16,7 @@ contract SimpleStoreTest is Test {
 
     /// @dev Ensure that you can create new DPD contracts.
     function testDpdInitialization() external {
-        //assertEq(repository.addDpd(bytes32(uint256(69)), address(this), address(this)), 0);
+        repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
         //assertEq(repository.addDpd(bytes32(uint256(70)), address(this), address(this)), 1);
     }
 }
@@ -39,7 +39,7 @@ interface Repository {
         bytes32,
         address,
         address
-    ) external returns (uint256);
+    ) external;
 
     /// @notice Update a DPD CID.
     /// @notice Can only be called by the DPD's Updater address.
