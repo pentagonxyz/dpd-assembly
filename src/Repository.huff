@@ -82,58 +82,80 @@
 
 /* DPD Initialization */
 #define macro ADD_DPD() = takes(0) returns (0) {
-    // Note that the length is updated after the DPD is added.
-
     // Get the DPD array length, which serves as the DPD ID.
-    [DPD_ARRAY_LENGTH_SLOT] sload             // [dpd_id]
+    0x04 calldataload                           // [dpd_id]
+    ID_CHECKS(error)                            // [dpd_id]
 
     // Store the DPD data.
-    0x04 calldataload                           // [data, dpd_id]
+    0x24 calldataload                           // [data, dpd_id]
     dup2                                        // [dpd_id, data, dpd_id]
     [DPD_ARRAY_SLOT]                            // [salt, dpd_id, data, dpd_id]
     STORE_ELEMENT_FROM_KEYS(0x00)               // [dpd_id]
 
     // Store the address of the owner.
-    0x24 calldataload                           // [owner, dpd_id, length*32, length]
+    0x44 calldataload                           // [owner, dpd_id, length*32, length]
     dup2                                        // [dpd_id, owner, dpd_io, length*32, length]
     [DPD_OWNER_MAP_SLOT]                        // [salt, dpd_id, owner, dpd_io, length*32, length]
     STORE_ELEMENT_FROM_KEYS(0x00)               // [dpd_id, length*32, length]
     
     // Store the address of the updater.
-    0x44 calldataload                           // [updater, dpd_id, length*32, length]
+    0x64 calldataload                           // [updater, dpd_id, length*32, length]
     dup2                                        // [dpd_id, updater, dpd_id, length*32, length]
     [DPD_UPDATER_MAP_SLOT]                      // [salt, dpd_id, updater, dpd_id, length*32, length]     
     STORE_ELEMENT_FROM_KEYS(0x00)               // [dpd_id, length*32, length]
 
-    // Incremement the DPD array length.
-    // Input Stack: [dpd_id]
-    [DPD_ARRAY_LENGTH_SLOT] // [slot, dpd_id]
-    dup2                    // [dpd_id, slot, dpd_id]                
-    0x01                    // [new_dpd_id, slot, dpd_id]
-    swap1                   // [slot, new_dpd_id, dpd_id]
-    sstore                  // [dpd_id]
+    // Stop the program.
+    stop
 
-    // Return the DPD_ID.
-    0x00 mstore // []
-    0x20 0x00   // [slot, length]
-    return      // []
+    // Revert if the checks are wrong.
+    error:
+        0x00 0x00 revert
+}
+
+// Ensure that a DPD ID has not been taken.
+// Input Stack: [dpd_id]
+// Output Stack: [dpd_id]
+#define macro ID_CHECKS(error) = takes(1) returns (1) {
+    // Retrieve the data from storage.
+    // Revert if it is nonzero.
+    dup1                            // [dpd_id, dpd_id]
+    [DPD_ARRAY_SLOT]                // [slot, dpd_id, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)    // [data, dpd_id]
+    0x00 eq iszero                  // [data != 0, dpd_id]
+    <error> jumpi                   // [dpd_id]
+
+    // Retrieve the owner from storage.
+    // Revert if the address is nonzero.
+    dup1                            // [dpd_id, dpd_id]
+    [DPD_OWNER_MAP_SLOT]            // [slot, dpd_id, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)    // [data, dpd_id]
+    0x00 eq iszero                  // [data != 0, dpd_id]
+    <error> jumpi                     // [dpd_id]
+
+    // Retrieve the updater from storage.
+    // Revert if the address is nonzero.
+    dup1                            // [dpd_id, dpd_id]
+    [DPD_UPDATER_MAP_SLOT]            // [slot, dpd_id, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)    // [data, dpd_id]
+    0x00 eq iszero                  // [data != 0, dpd_id]
+    <error> jumpi                     // [dpd_id]
 }
 
 /* Main Macro */
 #define macro MAIN() = takes(0) returns (0) {
     0x00 calldataload 0xE0 shr // [sig]
-    dup1 0xd393e1b2 eq add_dpd jumpi
+    dup1 0x91256f59 eq new_dpd jumpi
     dup1 0x2acb38eb eq get_dpd_data jumpi
-    0x00 0x00 revert
 
-    add_dpd:
+    new_dpd:
         ADD_DPD()
+
     get_dpd_data:
         GET_DPD_DATA()
-    get_dpd_owner:
-        GET_DPD_OWNER()
-    GET_DPD_UPDATER:
-        GET_DPD_UPDATER()
-    get_dpd_version:
-        GET_DPD_VERSION()
+    // get_dpd_owner:
+    //     GET_DPD_OWNER()
+    // GET_DPD_UPDATER:
+    //     GET_DPD_UPDATER()
+    // get_dpd_version:
+    //     GET_DPD_VERSION()
 }
