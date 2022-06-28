@@ -141,6 +141,11 @@
     <error> jumpi                     // [dpd_id]
 }
 
+/* Update Data Macros */
+#define macro UPDATE_DPD_DATA() = takes(0) returns (0) {}
+#define macro UPDATE_DPD_UPDATER() = takes(0) returns (0) {}
+#define macro UPDATE_DPD_OWNER() = takes(0) returns (0) {}
+
 /* Main Macro */
 #define macro MAIN() = takes(0) returns (0) {
     0x00 calldataload 0xE0 shr // [sig]
@@ -149,10 +154,14 @@
     dup1 0x025e7c27 eq get_dpd_owner jumpi
     dup1 0x82cb6229 eq get_dpd_updater jumpi
     dup1 0x87aee00e eq get_dpd_version jumpi
+    dup1 0xf9124637 eq update_dpd_data jumpi
+    dup1 0x7c6e99a4 eq update_dpd_owner jumpi
+    dup1 0x9e82b5d6 eq update_dpd_updater jumpi
+
+    0x00 0x00 revert
 
     new_dpd:
         ADD_DPD()
-
     get_dpd_data:
         GET_DPD_DATA()
     get_dpd_owner:
@@ -161,4 +170,10 @@
         GET_DPD_UPDATER()
     get_dpd_version:
         GET_DPD_VERSION()
+    update_dpd_data:
+        UPDATE_DPD_DATA()
+    update_dpd_owner:
+        UPDATE_DPD_OWNER()
+    update_dpd_updater:
+        UPDATE_DPD_UPDATER()
 }
