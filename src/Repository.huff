@@ -146,16 +146,18 @@
     0x00 calldataload 0xE0 shr // [sig]
     dup1 0x91256f59 eq new_dpd jumpi
     dup1 0x2acb38eb eq get_dpd_data jumpi
+    dup1 0x025e7c27 eq get_dpd_owner jumpi
+    dup1 0x82cb6229 eq get_dpd_updater jumpi
 
     new_dpd:
         ADD_DPD()
 
     get_dpd_data:
         GET_DPD_DATA()
-    // get_dpd_owner:
-    //     GET_DPD_OWNER()
-    // GET_DPD_UPDATER:
-    //     GET_DPD_UPDATER()
+    get_dpd_owner:
+        GET_DPD_OWNER()
+    get_dpd_updater:
+        GET_DPD_UPDATER()
     // get_dpd_version:
     //     GET_DPD_VERSION()
 }
