@@ -16,8 +16,8 @@ contract SimpleStoreTest is Test {
 
     /// @dev Ensure that you can create new DPD contracts.
     function testDpdInitialization() external {
-        assertEq(repository.addDpd(bytes32(uint256(69)), address(this), address(this)), 0);
-        assertEq(repository.addDpd(bytes32(uint256(70)), address(this), address(this)), 1);
+        //assertEq(repository.addDpd(bytes32(uint256(69)), address(this), address(this)), 0);
+        //assertEq(repository.addDpd(bytes32(uint256(70)), address(this), address(this)), 1);
     }
 }
 
@@ -35,6 +35,7 @@ interface Repository {
 
     /// @notice Given a CID, owner address, and updater address, initialize a new DPD.
     function addDpd(
+        uint256,
         bytes32,
         address,
         address
