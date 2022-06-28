@@ -17,7 +17,9 @@ contract SimpleStoreTest is Test {
     /// @dev Ensure that you can create new DPD contracts.
     function testDpdInitialization() external {
         repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
-        //assertEq(repository.addDpd(bytes32(uint256(70)), address(this), address(this)), 1);
+        assertEq(repository.dpds(0), bytes32(uint256(69)));
+        assertEq(repository.owners(0), address(this));
+        assertEq(repository.updaters(0), address(this));
     }
 }
 
@@ -26,10 +28,10 @@ interface Repository {
     function dpds(uint256) external view returns (bytes32);
 
     /// @notice Given a DPD id, return its owner address.
-    function owners(uint256) external view returns (bytes32);
+    function owners(uint256) external view returns (address);
 
     /// @notice Given a DPD id, return its updater address.
-    function updaters(uint256) external view returns (bytes32);
+    function updaters(uint256) external view returns (address);
 
     /// @notice Given a DPD id, return its current address.
 
