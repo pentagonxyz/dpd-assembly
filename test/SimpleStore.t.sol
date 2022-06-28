@@ -15,15 +15,28 @@ contract SimpleStoreTest is Test {
     }
 
     /// @dev Ensure that you can create new DPDs.
-    function testDpdInitialization() external {
+    function testDpdInitialization() public {
         repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
+
         assertEq(repository.dpds(0), bytes32(uint256(69)));
         assertEq(repository.owners(0), address(this));
         assertEq(repository.updaters(0), address(this));
+        assertEq(repository.versions(0), 0);
     }
 
     /// @dev Ensure that you cannot create two DPDs with the same ID.
-    function testFailNumberMustBeDifferent() external {
+    function testInitializeMultipleDpds() public {
+        testDpdInitialization();
+        repository.addDpd(1, bytes32(uint256(69)), address(this), address(this));
+
+        assertEq(repository.dpds(1), bytes32(uint256(69)));
+        assertEq(repository.owners(1), address(this));
+        assertEq(repository.updaters(1), address(this));
+        assertEq(repository.versions(1), 0);
+    }
+
+    /// @dev Ensure that you cannot create two DPDs with the same ID.
+    function testFailNumberMustBeDifferent() public {
         repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
         repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
     }
@@ -39,7 +52,8 @@ interface Repository {
     /// @notice Given a DPD id, return its updater address.
     function updaters(uint256) external view returns (address);
 
-    /// @notice Given a DPD id, return its current address.
+    /// @notice Given a DPD id, return its current version.
+    function versions(uint256) external view returns (uint256);
 
     /// @notice Given a CID, owner address, and updater address, initialize a new DPD.
     function addDpd(
