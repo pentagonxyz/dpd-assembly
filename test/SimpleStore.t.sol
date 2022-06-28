@@ -14,12 +14,18 @@ contract SimpleStoreTest is Test {
         repository = Repository(HuffDeployer.deploy("Repository"));
     }
 
-    /// @dev Ensure that you can create new DPD contracts.
+    /// @dev Ensure that you can create new DPDs.
     function testDpdInitialization() external {
         repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
         assertEq(repository.dpds(0), bytes32(uint256(69)));
         assertEq(repository.owners(0), address(this));
         assertEq(repository.updaters(0), address(this));
+    }
+
+    /// @dev Ensure that you cannot create two DPDs with the same ID.
+    function testFailNumberMustBeDifferent() external {
+        repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
+        repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
     }
 }
 
