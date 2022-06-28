@@ -147,12 +147,18 @@
     0x24 calldataload                   // [data]
     0x04 calldataload                   // [dpd_id, data]
 
-    // Ensure that the sender is the DPD updater.
+    // Ensure that the sender is the DPD updater or owner.
     dup1                                // [dpd_id, dpd_id, data]
     [DPD_UPDATER_MAP_SLOT]              // [salt, dpd_id, dpd_id, data]
     LOAD_ELEMENT_FROM_KEYS(0x00)        // [updater, dpd_id, data]
     caller                              // [msg.sender, updater, dpd_id, data]
-    eq iszero                           // [msg.sender != updater, dpd_id, data]
+    eq iszero                           // [msg.sender!=updater, dpd_id, data]
+    dup2                                // [dpd_id, msg.sender!=updater, dpd_id, data]
+    [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, msg.sender!=updater, dpd_id, data]
+    LOAD_ELEMENT_FROM_KEYS(0x00)        // [owner, msg.sender!=updater, dpd_id, data]
+    caller                              // [msg.sender, owner, msg.sender!=updater, dpd_id, data]
+    eq iszero                           // [msg.sender!=owner, msg.sender!=updater, dpd_id, data]
+    or                                  // [msg.sender!=owner || msg.sender!=updater, dpd_id, data]
     error jumpi                         // [dpd_id, data]
 
     // Store new data.
@@ -165,8 +171,6 @@
     // Error label.
     error:
         0x00 0x00 revert
-
-    
 }
 #define macro UPDATE_DPD_UPDATER() = takes(0) returns (0) {}
 #define macro UPDATE_DPD_OWNER() = takes(0) returns (0) {}
