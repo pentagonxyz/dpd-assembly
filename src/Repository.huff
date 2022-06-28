@@ -148,6 +148,7 @@
     dup1 0x2acb38eb eq get_dpd_data jumpi
     dup1 0x025e7c27 eq get_dpd_owner jumpi
     dup1 0x82cb6229 eq get_dpd_updater jumpi
+    dup1 0x87aee00e eq get_dpd_version jumpi
 
     new_dpd:
         ADD_DPD()
@@ -158,6 +159,6 @@
         GET_DPD_OWNER()
     get_dpd_updater:
         GET_DPD_UPDATER()
-    // get_dpd_version:
-    //     GET_DPD_VERSION()
+    get_dpd_version:
+        GET_DPD_VERSION()
 }
