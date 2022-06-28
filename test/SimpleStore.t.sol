@@ -40,6 +40,13 @@ contract SimpleStoreTest is Test {
         repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
         repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
     }
+
+    function testUpdateData() public {
+        repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
+        repository.updateDpdData(0, bytes32(uint256(1000)));
+
+        assertEq(uint256(repository.dpds(0)), 1000);
+    }
 }
 
 interface Repository {
@@ -65,11 +72,11 @@ interface Repository {
 
     /// @notice Update a DPD CID.
     /// @notice Can only be called by the DPD's Updater address.
-    function updateDPD(uint256, bytes32) external;
+    function updateDpdData(uint256, bytes32) external;
 
     /// @notice Set a new DPD owner.
-    function setDPDOwner(uint256, address) external;
+    function updateDpdOwner(uint256, address) external;
 
     /// @notice Set a new DPD updater.
-    function setDPDUpdater(uint256, address) external;
+    function updateDpdUpdater(uint256, address) external;
 }
