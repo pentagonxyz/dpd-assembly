@@ -41,11 +41,27 @@ contract SimpleStoreTest is Test {
         repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
     }
 
+    /// @dev Ensure that you can update DPD data.
     function testUpdateData() public {
         repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
         repository.updateDpdData(0, bytes32(uint256(1000)));
 
         assertEq(uint256(repository.dpds(0)), 1000);
+    }
+
+    /// @dev Ensure that you can update the updater address of a DPD.
+    function testUpdateUpdater() public {
+        repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
+        repository.updateDpdUpdater(0, address(20));
+        assertEq(repository.updaters(0), address(20));
+    }
+
+    /// @dev Ensure that you can update the owner address of a DPD.
+    function testUpdateOwner() public {
+        repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
+        repository.updateDpdOwner(0, address(20));
+
+        assertEq(repository.owners(0), address(20));
     }
 }
 
