@@ -21,7 +21,6 @@ contract SimpleStoreTest is Test {
         assertEq(repository.dpds(0), bytes32(uint256(69)));
         assertEq(repository.owners(0), address(this));
         assertEq(repository.updaters(0), address(this));
-        assertEq(repository.versions(0), 0);
     }
 
     /// @dev Ensure that you cannot create two DPDs with the same ID.
@@ -32,7 +31,6 @@ contract SimpleStoreTest is Test {
         assertEq(repository.dpds(1), bytes32(uint256(69)));
         assertEq(repository.owners(1), address(this));
         assertEq(repository.updaters(1), address(this));
-        assertEq(repository.versions(1), 0);
     }
 
     /// @dev Ensure that you cannot create two DPDs with the same ID.
@@ -75,9 +73,6 @@ interface Repository {
     /// @notice Given a DPD id, return its updater address.
     function updaters(uint256) external view returns (address);
 
-    /// @notice Given a DPD id, return its current version.
-    function versions(uint256) external view returns (uint256);
-
     /// @notice Given a CID, owner address, and updater address, initialize a new DPD.
     function addDpd(
         uint256,
@@ -95,4 +90,16 @@ interface Repository {
 
     /// @notice Set a new DPD updater.
     function updateDpdUpdater(uint256, address) external;
+
+    /// @notice Event emitted when a new DPD is added to the repository.
+    event DPDAdded(uint256 indexed dpdId, address owner, address updater, bytes32 cid);
+
+    /// @notice Event emitted when a new DPD is added to the repository.
+    event DPDUpdated(uint256 indexed dpdId, bytes32 cid);
+
+    /// @notice Event emitted when a DPD's owner is changed.
+    event DPDOwnerUpdated(uint256 indexed dpdId, address newOwner);
+
+    /// @notice Event emitted when a DPD's upgrader is changed.
+    event DPDUpdaterUpdated(uint256 indexed dpdId, address newUpdater);
 }

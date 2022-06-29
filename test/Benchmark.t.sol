@@ -19,7 +19,7 @@ contract SimpleStoreTest is Test {
     }
 
     /// @dev Compare the contract sizes.
-    function testDeploymentSize() public {
+    function testDeploymentSize() public view {
         uint256 huffSize;
         uint256 soliditySize;
 
