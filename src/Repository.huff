@@ -82,7 +82,7 @@
     0x44 calldataload 0x00 mstore               // [sig, dpd_id, dpd_id]
     0x64 calldataload 0x20 mstore               // [sig, dpd_id, dpd_id]
     0x24 calldataload 0x40 mstore               // [sig, dpd_id, dpd_id]
-    0x40 0x00                                   // [offset, size, sig, dpd_id, dpd_id]
+    0x60 0x00                                   // [offset, size, sig, dpd_id, dpd_id]
     log2                                        // [dpd_id]
 
     // Store the DPD data.
@@ -146,6 +146,15 @@
     0x24 calldataload                   // [data]
     0x04 calldataload                   // [dpd_id, data]
 
+    // Emit the event.
+    // DPDUpdated(uint256 indexed dpdId, bytes32 cid)
+    dup1                                // [dpd_id, dpd_id, data]
+    [DPD_UPDATER_CHANGED_EVENT_SIGNATURE]       // [sig, dpd_id, dpd_id, data]
+    dup4                                // [data, sig, dpd_id, dpd_id, data]
+    0x00 mstore                         // [sig, dpd_id, dpd_id, data]
+    0x20 0x00                           // [offset, size, sig, dpd_id, dpd_id, data]
+    log2                                // [dpd_id, data]
+
     // Ensure that the sender is the DPD updater or owner.
     dup1                                // [dpd_id, dpd_id, data]
     [DPD_UPDATER_MAP_SLOT]              // [salt, dpd_id, dpd_id, data]
@@ -177,6 +186,16 @@
     0x24 calldataload                   // [updater]
     0x04 calldataload                   // [dpd_id, updater]
 
+    // Emit the event.
+    // DPDUpdaterUpdated(uint256 indexed dpdId, address newUpdater)
+    dup1                                // [dpd_id, dpd_id, updater]
+    [DPD_OWNER_CHANGED_EVENT_SIGNATURE]       // [sig, dpd_id, dpd_id, updater]
+    dup4                                // [updater, sig, dpd_id, dpd_id, updater]
+    0x00 mstore                         // [sig, dpd_id, dpd_id, updater]
+    0x20 0x00                           // [offset, size, sig, dpd_id, dpd_id, updater]
+    log2                                // [dpd_id, updater]
+
+
     // Ensure that the sender is the DPD updater.
     dup1                                // [dpd_id, dpd_id, updater]
     [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, dpd_id, updater]
@@ -202,6 +221,15 @@
     0x24 calldataload                   // [owner]
     0x04 calldataload                   // [dpd_id, owner]
 
+    // Emit the event.
+    // DPDOwnerUpdated(uint256 indexed dpdId, address newOwner)
+    dup1                                // [dpd_id, dpd_id, updater]
+    [DPD_UPDATED_EVENT_SIGNATURE]       // [sig, dpd_id, dpd_id, updater]
+    dup4                                // [updater, sig, dpd_id, dpd_id, updater]
+    0x00 mstore                         // [sig, dpd_id, dpd_id, updater]
+    0x20 0x00                           // [offset, size, sig, dpd_id, dpd_id, updater]
+    log2                                // [dpd_id, updater]
+
     // Ensure that the sender is the DPD owner.
     dup1                                // [dpd_id, dpd_id, owner]
     [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, dpd_id, owner]
@@ -209,8 +237,6 @@
     caller                              // [msg.sender, owner, dpd_id, owner]
     eq iszero                           // [msg.sender != owner, dpd_id, owner]
     error jumpi                         // [dpd_id, owner]
-
-    0x03 pop
 
     // Store new data.
     [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, owner]
