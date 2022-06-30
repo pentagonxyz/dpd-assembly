@@ -146,7 +146,7 @@
     // Emit the event.
     // DPDUpdated(uint256 indexed dpdId, bytes32 cid)
     dup1                                // [dpd_id, dpd_id, data]
-    [DPD_UPDATER_CHANGED_EVENT_SIGNATURE]       // [sig, dpd_id, dpd_id, data]
+    [DPD_UPDATED_EVENT_SIGNATURE]       // [sig, dpd_id, dpd_id, data]
     dup4                                // [data, sig, dpd_id, dpd_id, data]
     0x00 mstore                         // [sig, dpd_id, dpd_id, data]
     0x20 0x00                           // [offset, size, sig, dpd_id, dpd_id, data]
@@ -180,30 +180,30 @@
 
 #define macro UPDATE_DPD_UPDATER() = takes(0) returns (0) {
     // Retrieve the DPD ID and data.
-    0x24 calldataload                   // [updater]
-    0x04 calldataload                   // [dpd_id, updater]
+    0x24 calldataload                           // [updater]
+    0x04 calldataload                           // [dpd_id, updater]
 
     // Emit the event.
     // DPDUpdaterUpdated(uint256 indexed dpdId, address newUpdater)
-    dup1                                // [dpd_id, dpd_id, updater]
-    [DPD_OWNER_CHANGED_EVENT_SIGNATURE]       // [sig, dpd_id, dpd_id, updater]
-    dup4                                // [updater, sig, dpd_id, dpd_id, updater]
-    0x00 mstore                         // [sig, dpd_id, dpd_id, updater]
-    0x20 0x00                           // [offset, size, sig, dpd_id, dpd_id, updater]
-    log2                                // [dpd_id, updater]
+    dup1                                        // [dpd_id, dpd_id, updater]
+    [DPD_UPDATER_CHANGED_EVENT_SIGNATURE]       // [sig, dpd_id, dpd_id, updater]
+    dup4                                        // [updater, sig, dpd_id, dpd_id, updater]
+    0x00 mstore                                 // [sig, dpd_id, dpd_id, updater]
+    0x20 0x00                                   // [offset, size, sig, dpd_id, dpd_id, updater]
+    log2                                        // [dpd_id, updater]
 
 
-    // Ensure that the sender is the DPD updater.
-    dup1                                // [dpd_id, dpd_id, updater]
-    [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, dpd_id, updater]
-    LOAD_ELEMENT_FROM_KEYS(0x00)        // [owner, dpd_id, updater]
-    caller                              // [msg.sender, owner, dpd_id, updater]
-    eq iszero                           // [msg.sender != owner, dpd_id, updater]
-    error jumpi                         // [dpd_id, updater]
+    // Ensure that the sender is the DPD owner.
+    dup1                                        // [dpd_id, dpd_id, updater]
+    [DPD_OWNER_MAP_SLOT]                        // [salt, dpd_id, dpd_id, updater]
+    LOAD_ELEMENT_FROM_KEYS(0x00)                // [owner, dpd_id, updater]
+    caller                                      // [msg.sender, owner, dpd_id, updater]
+    eq iszero                                   // [msg.sender != owner, dpd_id, updater]
+    error jumpi                                 // [dpd_id, updater]
 
     // Store new data.
-    [DPD_UPDATER_MAP_SLOT]              // [salt, dpd_id, updater]
-    STORE_ELEMENT_FROM_KEYS(0x00)       // []
+    [DPD_UPDATER_MAP_SLOT]                      // [salt, dpd_id, updater]
+    STORE_ELEMENT_FROM_KEYS(0x00)               // []
 
     // Stop the program.
     stop
@@ -215,29 +215,29 @@
 
 #define macro UPDATE_DPD_OWNER() = takes(0) returns (0) {
     // Retrieve the DPD ID and data.
-    0x24 calldataload                   // [owner]
-    0x04 calldataload                   // [dpd_id, owner]
+    0x24 calldataload                         // [owner]
+    0x04 calldataload                         // [dpd_id, owner]
 
     // Emit the event.
     // DPDOwnerUpdated(uint256 indexed dpdId, address newOwner)
-    dup1                                // [dpd_id, dpd_id, updater]
-    [DPD_UPDATED_EVENT_SIGNATURE]       // [sig, dpd_id, dpd_id, updater]
-    dup4                                // [updater, sig, dpd_id, dpd_id, updater]
-    0x00 mstore                         // [sig, dpd_id, dpd_id, updater]
-    0x20 0x00                           // [offset, size, sig, dpd_id, dpd_id, updater]
-    log2                                // [dpd_id, updater]
+    dup1                                      // [dpd_id, dpd_id, updater]
+    [DPD_OWNER_CHANGED_EVENT_SIGNATURE]       // [sig, dpd_id, dpd_id, updater]
+    dup4                                      // [updater, sig, dpd_id, dpd_id, updater]
+    0x00 mstore                               // [sig, dpd_id, dpd_id, updater]
+    0x20 0x00                                 // [offset, size, sig, dpd_id, dpd_id, updater]
+    log2                                      // [dpd_id, updater]
 
     // Ensure that the sender is the DPD owner.
-    dup1                                // [dpd_id, dpd_id, owner]
-    [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, dpd_id, owner]
-    LOAD_ELEMENT_FROM_KEYS(0x00)        // [owner, dpd_id, owner]
-    caller                              // [msg.sender, owner, dpd_id, owner]
-    eq iszero                           // [msg.sender != owner, dpd_id, owner]
-    error jumpi                         // [dpd_id, owner]
+    dup1                                      // [dpd_id, dpd_id, owner]
+    [DPD_OWNER_MAP_SLOT]                      // [salt, dpd_id, dpd_id, owner]
+    LOAD_ELEMENT_FROM_KEYS(0x00)              // [owner, dpd_id, owner]
+    caller                                    // [msg.sender, owner, dpd_id, owner]
+    eq iszero                                 // [msg.sender != owner, dpd_id, owner]
+    error jumpi                               // [dpd_id, owner]
 
     // Store new data.
-    [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, owner]
-    STORE_ELEMENT_FROM_KEYS(0x00)       // []
+    [DPD_OWNER_MAP_SLOT]                      // [salt, dpd_id, owner]
+    STORE_ELEMENT_FROM_KEYS(0x00)             // []
 
     // Stop the program.
     stop
