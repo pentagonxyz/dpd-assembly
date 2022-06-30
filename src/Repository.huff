@@ -96,7 +96,7 @@
     dup2                                        // [dpd_id, owner, dpd_io, length*32, length]
     [DPD_OWNER_MAP_SLOT]                        // [salt, dpd_id, owner, dpd_io, length*32, length]
     STORE_ELEMENT_FROM_KEYS(0x00)               // [dpd_id, length*32, length]
-    
+
     // Store the address of the updater.
     0x64 calldataload                           // [updater, dpd_id, length*32, length]
     dup2                                        // [dpd_id, updater, dpd_id, length*32, length]
