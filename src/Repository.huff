@@ -117,26 +117,23 @@
 #define macro ID_CHECKS(error) = takes(1) returns (1) {
     // Retrieve the data from storage.
     // Revert if it is nonzero.
-    dup1                            // [dpd_id, dpd_id]
-    [DPD_ARRAY_SLOT]                // [slot, dpd_id, dpd_id]
-    LOAD_ELEMENT_FROM_KEYS(0x00)    // [data, dpd_id]
-    0x00 eq iszero                  // [data != 0, dpd_id]
-    <error> jumpi                   // [dpd_id]
+    dup1                              // [dpd_id, dpd_id]
+    [DPD_ARRAY_SLOT]                  // [slot, dpd_id, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)      // [data, dpd_id]
+    <error> jumpi                     // [dpd_id]
 
     // Retrieve the owner from storage.
     // Revert if the address is nonzero.
-    dup1                            // [dpd_id, dpd_id]
-    [DPD_OWNER_MAP_SLOT]            // [slot, dpd_id, dpd_id]
-    LOAD_ELEMENT_FROM_KEYS(0x00)    // [data, dpd_id]
-    0x00 eq iszero                  // [data != 0, dpd_id]
+    dup1                              // [dpd_id, dpd_id]
+    [DPD_OWNER_MAP_SLOT]              // [slot, dpd_id, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)      // [data, dpd_id]
     <error> jumpi                     // [dpd_id]
 
     // Retrieve the updater from storage.
     // Revert if the address is nonzero.
-    dup1                            // [dpd_id, dpd_id]
+    dup1                              // [dpd_id, dpd_id]
     [DPD_UPDATER_MAP_SLOT]            // [slot, dpd_id, dpd_id]
-    LOAD_ELEMENT_FROM_KEYS(0x00)    // [data, dpd_id]
-    0x00 eq iszero                  // [data != 0, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)      // [data, dpd_id]
     <error> jumpi                     // [dpd_id]
 }
 
