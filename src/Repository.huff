@@ -46,27 +46,31 @@
     [DPD_ARRAY_SLOT]                // [slot, dpd_id]
     LOAD_ELEMENT_FROM_KEYS(0x00)    // [data]
 
-    // Return the data
+    // Return the data.
     0x00 mstore                     // []
     0x20 0x00 return                // []
 }
 
 #define macro GET_DPD_OWNER() = takes(0) returns (0) {
-    0x04 calldataload                           // [dpd_id]
-    [DPD_OWNER_MAP_SLOT]                        // [salt, dpd_id]
-    LOAD_ELEMENT_FROM_KEYS(0x00)                // [owner]
-    0x00 mstore                                 // [] 
-    0x20 0x00                                   // [32, 0]
-    return                                      // []
+    // Retrieve the data from storage.
+    0x04 calldataload               // [dpd_id]
+    [DPD_OWNER_MAP_SLOT]            // [salt, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)    // [owner]
+
+    // Return the data.
+    0x00 mstore                     // []
+    0x20 0x00 return                // []
 }
 
 #define macro GET_DPD_UPDATER() = takes(0) returns (0) {
+    // Retrieve the data from storage.
     0x04 calldataload                           // [dpd_id]
     [DPD_UPDATER_MAP_SLOT]                      // [salt, dpd_id]
     LOAD_ELEMENT_FROM_KEYS(0x00)                // [updater]
-    0x00 mstore                                 // [] 
-    0x20 0x00                                   // [32, 0]
-    return                                      // []
+
+    // Return the data.
+    0x00 mstore                     // []
+    0x20 0x00 return                // []
 }
 
 /* DPD Initialization */
