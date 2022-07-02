@@ -54,8 +54,8 @@ contract BenchmarkedTest is Test {
         Repository _repository = repository;
         DPDRepository _ogRepository = ogRepository;
 
-        _repository.addDpd(0, address(0), address(0), 0);
-        _ogRepository.addDpd(0, address(0), address(0), 0);
+        _repository.addDpd(0, address(this), address(this), 0);
+        _ogRepository.addDpd(0, address(this), address(this), 0);
 
         uint256 huffGasBefore = gasleft();
         _repository.updateDpdData(0, bytes32(uint256(1)));
@@ -74,8 +74,8 @@ contract BenchmarkedTest is Test {
         Repository _repository = repository;
         DPDRepository _ogRepository = ogRepository;
 
-        _repository.addDpd(0, address(0), address(0), 0);
-        _ogRepository.addDpd(0, address(0), address(0), 0);
+        _repository.addDpd(0, address(this), address(this), 0);
+        _ogRepository.addDpd(0, address(this), address(this), 0);
 
         uint256 huffGasBefore = gasleft();
         _repository.updateDpdOwner(0, address(1));
@@ -94,8 +94,8 @@ contract BenchmarkedTest is Test {
         Repository _repository = repository;
         DPDRepository _ogRepository = ogRepository;
 
-        _repository.addDpd(0, address(0), address(0), 0);
-        _ogRepository.addDpd(0, address(0), address(0), 0);
+        _repository.addDpd(0, address(this), address(this), 0);
+        _ogRepository.addDpd(0, address(this), address(this), 0);
 
         uint256 huffGasBefore = gasleft();
         _repository.updateDpdUpdater(0, address(1));

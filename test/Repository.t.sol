@@ -39,6 +39,9 @@ contract RepositoryTest is Test {
     /// @dev Ensure that you cannot create two DPDs with the same ID.
     function testInitializeMultipleDpds() public {
         testDpdInitialization();
+
+        vm.expectEmit(true, true, true, true);
+        emit DPDAdded(1, address(this), address(this), bytes32(uint256(69)));
         repository.addDpd(1, address(this), address(this), bytes32(uint256(69)));
 
         assertEq(repository.dpds(1), bytes32(uint256(69)));
@@ -54,7 +57,12 @@ contract RepositoryTest is Test {
 
     /// @dev Ensure that you can update DPD data.
     function testUpdateData() public {
+        vm.expectEmit(true, true, true, true);
+        emit DPDAdded(0, address(this), address(this), bytes32(uint256(69)));
         repository.addDpd(0, address(this), address(this), bytes32(uint256(69)));
+
+        vm.expectEmit(true, true, true, true);
+        emit DPDUpdated(0, bytes32(uint256(1000)));
         repository.updateDpdData(0, bytes32(uint256(1000)));
 
         assertEq(uint256(repository.dpds(0)), 1000);
@@ -63,13 +71,20 @@ contract RepositoryTest is Test {
     /// @dev Ensure that you can update the updater address of a DPD.
     function testUpdateUpdater() public {
         repository.addDpd(0, address(this), address(this), bytes32(uint256(69)));
+
+        vm.expectEmit(true, true, true, true);
+        emit DPDUpdaterUpdated(0, address(20));
         repository.updateDpdUpdater(0, address(20));
+
         assertEq(repository.updater(0), address(20));
     }
 
     /// @dev Ensure that you can update the owner address of a DPD.
     function testUpdateOwner() public {
         repository.addDpd(0, address(this), address(this), bytes32(uint256(69)));
+
+        vm.expectEmit(true, true, true, true);
+        emit DPDOwnerUpdated(0, address(20));
         repository.updateDpdOwner(0, address(20));
 
         assertEq(repository.owner(0), address(20));
