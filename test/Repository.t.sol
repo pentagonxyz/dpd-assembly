@@ -26,7 +26,7 @@ contract RepositoryTest is Test {
     }
 
     /// @notice Test that a non-matching selector reverts
-    function testNonMatchingSelector(bytes32 callData) view {
+    function testNonMatchingSelector(bytes32 callData) public {
         bytes8[] memory func_selectors = new bytes8[](7);
         func_selectors[0] = bytes8(hex"32bb50b2");
         func_selectors[1] = bytes8(hex"2acb38eb");
