@@ -64,9 +64,9 @@
 
 #define macro GET_DPD_UPDATER() = takes(0) returns (0) {
     // Retrieve the data from storage.
-    0x04 calldataload                           // [dpd_id]
-    [DPD_UPDATER_MAP_SLOT]                      // [salt, dpd_id]
-    LOAD_ELEMENT_FROM_KEYS(0x00)                // [updater]
+    0x04 calldataload               // [dpd_id]
+    [DPD_UPDATER_MAP_SLOT]          // [salt, dpd_id]
+    LOAD_ELEMENT_FROM_KEYS(0x00)    // [updater]
 
     // Return the data.
     0x00 mstore                     // []
