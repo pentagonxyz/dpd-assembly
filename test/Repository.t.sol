@@ -25,6 +25,41 @@ contract RepositoryTest is Test {
         repository = Repository(HuffDeployer.deploy("Repository"));
     }
 
+    /// @notice Test that a non-matching selector reverts
+    function testNonMatchingSelector(bytes32 callData) view {
+        bytes8[] memory func_selectors = new bytes8[](7);
+        func_selectors[0] = bytes8(hex"32bb50b2");
+        func_selectors[1] = bytes8(hex"2acb38eb");
+        func_selectors[2] = bytes8(hex"a123c33e");
+        func_selectors[3] = bytes8(hex"70424ffb");
+        func_selectors[4] = bytes8(hex"7c6e99a4");
+        func_selectors[5] = bytes8(hex"f9124637");
+        func_selectors[5] = bytes8(hex"9e82b5d6");
+
+        bytes8 func_selector = bytes8(callData >> 0xe0);
+        for (uint256 i = 0; i < 7; i++) {
+            if (func_selector != func_selectors[i]) {
+                return;
+            }
+        }
+
+        address target = address(repository);
+        uint256 OneWord = 0x20;
+        bool success = false;
+        assembly {
+            success := staticcall(
+                gas(),
+                target,
+                add(callData, OneWord),
+                mload(callData),
+                0,
+                0
+            )
+        }
+
+        assert(!success);
+    }
+
     /// @dev Ensure that you can create new DPDs.
     function testDpdInitialization() public {
         vm.expectEmit(true, true, true, true);
