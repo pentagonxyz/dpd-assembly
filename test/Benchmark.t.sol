@@ -123,7 +123,7 @@ interface Repository {
     /// @notice Given a DPD id, return its current version.
     function versions(uint256) external view returns (uint256);
 
-    /// @notice Given a CID, owner address, and updater address, initialize a new DPD.
+    /// @notice Given a DPD id, CID, owner address, and updater address, initialize a new DPD.
     function addDpd(
         uint256,
         bytes32,
@@ -144,7 +144,7 @@ interface Repository {
     /// @notice Event emitted when a new DPD is added to the repository.
     event DPDAdded(uint256 indexed dpdId, address owner, address updater, bytes32 cid);
 
-    /// @notice Event emitted when a new DPD is added to the repository.
+    /// @notice Event emitted when a DPD is updated.
     event DPDUpdated(uint256 indexed dpdId, bytes32 cid);
 
     /// @notice Event emitted when a DPD's owner is changed.

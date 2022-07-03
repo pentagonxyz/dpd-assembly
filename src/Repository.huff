@@ -4,19 +4,31 @@
 
 /* Interface */
 
+/// @notice Given a DPD id, CID, owner address, and updater address, initialize a new DPD.
 #define function addDpd(uint256,bytes32,address,address) nonpayable returns ()
 
+/// @notice Given a DPD id, return its CID.
 #define function dpds(uint256) view returns (bytes32)
+/// @notice Given a DPD id, return its owner address.
 #define function owners(uint256) view returns (address)
+/// @notice Given a DPD id, return its updater address.
 #define function updaters(uint256) view returns (address)
 
+/// @notice Update a DPD CID.
+/// @notice Can only be called by the DPD's Updater address.
 #define function updateDpdData(uint256, bytes32) nonpayable returns ()
+/// @notice Set a new DPD owner.
 #define function updateDpdOwner(uint256, address) nonpayable returns ()
+/// @notice Set a new DPD updater.
 #define function updateDpdUpdater(uint256, address) nonpayable returns ()
 
+/// @notice Event emitted when a new DPD is added to the repository.
 #define event DPDAdded(uint256, address, address,bytes32)
+/// @notice Event emitted when a DPD is updated.
 #define event DPDUpdated(uint256,uint256,bytes32)
+/// @notice Event emitted when a DPD's owner is changed.
 #define event DPDOwnerChanged(uint256,address)
+/// @notice Event emitted when a DPD's upgrader is changed.
 #define event DPDUpdaterChanged(uint256,address)
 
 /* Event Signatures */
