@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "./benchmarks/DPDRepository.sol";
 
-contract SimpleStoreTest is Test {
+contract BenchmarkTest is Test {
     /// @dev Address of the Huff DPDRepository contract.
     Repository public repository;
 
