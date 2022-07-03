@@ -184,7 +184,7 @@
     LOAD_ELEMENT_FROM_KEYS(0x00)        // [owner, msg.sender!=updater, dpd_id, data]
     caller                              // [msg.sender, owner, msg.sender!=updater, dpd_id, data]
     eq iszero                           // [msg.sender!=owner, msg.sender!=updater, dpd_id, data]
-    or                                  // [msg.sender!=owner || msg.sender!=updater, dpd_id, data]
+    and                                 // [msg.sender!=owner && msg.sender!=updater, dpd_id, data]
     error jumpi                         // [dpd_id, data]
 
     // Store new data.

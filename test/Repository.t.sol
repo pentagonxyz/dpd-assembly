@@ -39,9 +39,17 @@ contract RepositoryTest is Test {
         repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
     }
 
-    /// @dev Ensure that you can update DPD data.
-    function testUpdateData() public {
-        repository.addDpd(0, bytes32(uint256(69)), address(this), address(this));
+    /// @dev Ensure that you can update DPD data as owner.
+    function testUpdateDataAsOwner() public {
+        repository.addDpd(0, bytes32(uint256(69)), address(this), address(0xBEEF));
+        repository.updateDpdData(0, bytes32(uint256(1000)));
+
+        assertEq(uint256(repository.dpds(0)), 1000);
+    }
+
+    /// @dev Ensure that you can update DPD data as updater.
+    function testUpdateDataAsUpdater() public {
+        repository.addDpd(0, bytes32(uint256(69)), address(0xBEEF), address(this));
         repository.updateDpdData(0, bytes32(uint256(1000)));
 
         assertEq(uint256(repository.dpds(0)), 1000);
