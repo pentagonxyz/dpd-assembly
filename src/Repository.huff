@@ -82,7 +82,7 @@
     ID_CHECKS(error)                            // [dpd_id]
 
     // Emit the event.
-    // DPDAdded(uint256 indexed dpdId, address owner, address updater, bytes32 cid)
+    // DPDAdded(uint256 indexed dpdId, address owner, address updater, bytes32 data)
     dup1                                        // [dpd_id, dpd_id]
     [DPD_ADDED_EVENT_SIGNATURE]                 // [sig, dpd_id, dpd_id]
     0x44 calldataload 0x00 mstore               // [sig, dpd_id, dpd_id]
@@ -153,7 +153,7 @@
     0x04 calldataload                   // [dpd_id, data]
 
     // Emit the event.
-    // DPDUpdated(uint256 indexed dpdId, bytes32 cid)
+    // DPDUpdated(uint256 indexed dpdId, bytes32 data)
     dup1                                // [dpd_id, dpd_id, data]
     [DPD_UPDATER_CHANGED_EVENT_SIGNATURE]       // [sig, dpd_id, dpd_id, data]
     dup4                                // [data, sig, dpd_id, dpd_id, data]
