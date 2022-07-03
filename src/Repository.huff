@@ -214,7 +214,7 @@
     log2                                // [dpd_id, updater]
 
 
-    // Ensure that the sender is the DPD updater.
+    // Ensure that the sender is the DPD owner.
     dup1                                // [dpd_id, dpd_id, updater]
     [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, dpd_id, updater]
     LOAD_ELEMENT_FROM_KEYS(0x00)        // [owner, dpd_id, updater]
