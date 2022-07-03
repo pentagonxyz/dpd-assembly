@@ -1,4 +1,3 @@
-all: compiler install update
-compiler:; yarn add huffc@$(version) 
+all: install update
 install:; forge install
 update:; forge update
