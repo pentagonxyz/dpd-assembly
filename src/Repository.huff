@@ -178,13 +178,13 @@
     [DPD_UPDATER_MAP_SLOT]              // [salt, dpd_id, dpd_id, data]
     LOAD_ELEMENT_FROM_KEYS(0x00)        // [updater, dpd_id, data]
     caller                              // [msg.sender, updater, dpd_id, data]
-    eq iszero                           // [msg.sender!=updater, dpd_id, data]
+    eq                                  // [msg.sender==updater, dpd_id, data]
     dup2                                // [dpd_id, msg.sender!=updater, dpd_id, data]
     [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, msg.sender!=updater, dpd_id, data]
     LOAD_ELEMENT_FROM_KEYS(0x00)        // [owner, msg.sender!=updater, dpd_id, data]
     caller                              // [msg.sender, owner, msg.sender!=updater, dpd_id, data]
-    eq iszero                           // [msg.sender!=owner, msg.sender!=updater, dpd_id, data]
-    and                                 // [msg.sender!=owner && msg.sender!=updater, dpd_id, data]
+    eq                                  // [msg.sender==owner, msg.sender==updater, dpd_id, data]
+    or iszero                           // [!(msg.sender==owner || msg.sender==updater), dpd_id, data]
     error jumpi                         // [dpd_id, data]
 
     // Store new data.
