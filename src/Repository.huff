@@ -7,14 +7,31 @@
 #define function owner(uint256) view returns (address)
 #define function updater(uint256) view returns(address)
 
-#define function addDpd(uint256, address, address, bytes32) nonpayable returns(uint256)
-#define function updateDpdData(uint256, bytes32) nonpayable returns()
-#define function updateDpdOwner(uint256, address) nonpayable returns()
-#define function updateDpdUpdater(uint256, address) nonpayable returns()
+/// @notice Given a DPD id, CID, owner address, and updater address, initialize a new DPD.
+#define function addDpd(uint256,bytes32,address,address) nonpayable returns ()
 
-#define event DPDAdded(uint256 indexed, address, address, bytes32)
-#define event DPDUpdated(uint256,bytes32)
+/// @notice Given a DPD id, return its CID.
+#define function dpds(uint256) view returns (bytes32)
+/// @notice Given a DPD id, return its owner address.
+#define function owners(uint256) view returns (address)
+/// @notice Given a DPD id, return its updater address.
+#define function updaters(uint256) view returns (address)
+
+/// @notice Update a DPD CID.
+/// @notice Can only be called by the DPD's Updater address.
+#define function updateDpdData(uint256, bytes32) nonpayable returns ()
+/// @notice Set a new DPD owner.
+#define function updateDpdOwner(uint256, address) nonpayable returns ()
+/// @notice Set a new DPD updater.
+#define function updateDpdUpdater(uint256, address) nonpayable returns ()
+
+/// @notice Event emitted when a new DPD is added to the repository.
+#define event DPDAdded(uint256, address, address,bytes32)
+/// @notice Event emitted when a DPD is updated.
+#define event DPDUpdated(uint256,uint256,bytes32)
+/// @notice Event emitted when a DPD's owner is changed.
 #define event DPDOwnerChanged(uint256,address)
+/// @notice Event emitted when a DPD's upgrader is changed.
 #define event DPDUpdaterChanged(uint256,address)
 
 /* Event Signatures */
@@ -156,13 +173,13 @@
     [DPD_UPDATER_MAP_SLOT]              // [salt, dpd_id, dpd_id, data]
     LOAD_ELEMENT_FROM_KEYS(0x00)        // [updater, dpd_id, data]
     caller                              // [msg.sender, updater, dpd_id, data]
-    eq iszero                           // [msg.sender!=updater, dpd_id, data]
+    eq                                  // [msg.sender==updater, dpd_id, data]
     dup2                                // [dpd_id, msg.sender!=updater, dpd_id, data]
     [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, msg.sender!=updater, dpd_id, data]
     LOAD_ELEMENT_FROM_KEYS(0x00)        // [owner, msg.sender!=updater, dpd_id, data]
     caller                              // [msg.sender, owner, msg.sender!=updater, dpd_id, data]
-    eq iszero                           // [msg.sender!=owner, msg.sender!=updater, dpd_id, data]
-    or                                  // [msg.sender!=owner || msg.sender!=updater, dpd_id, data]
+    eq                                  // [msg.sender==owner, msg.sender==updater, dpd_id, data]
+    or iszero                           // [!(msg.sender==owner || msg.sender==updater), dpd_id, data]
     error jumpi                         // [dpd_id, data]
 
     // Store new data.
@@ -193,12 +210,12 @@
 
 
     // Ensure that the sender is the DPD owner.
-    dup1                                        // [dpd_id, dpd_id, updater]
-    [DPD_OWNER_MAP_SLOT]                        // [salt, dpd_id, dpd_id, updater]
-    LOAD_ELEMENT_FROM_KEYS(0x00)                // [owner, dpd_id, updater]
-    caller                                      // [msg.sender, owner, dpd_id, updater]
-    eq iszero                                   // [msg.sender != owner, dpd_id, updater]
-    error jumpi                                 // [dpd_id, updater]
+    dup1                                // [dpd_id, dpd_id, updater]
+    [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, dpd_id, updater]
+    LOAD_ELEMENT_FROM_KEYS(0x00)        // [owner, dpd_id, updater]
+    caller                              // [msg.sender, owner, dpd_id, updater]
+    eq iszero                           // [msg.sender != owner, dpd_id, updater]
+    error jumpi                         // [dpd_id, updater]
 
     // Store new data.
     [DPD_UPDATER_MAP_SLOT]                      // [salt, dpd_id, updater]

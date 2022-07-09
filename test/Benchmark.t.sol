@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "./benchmarks/DPDRepository.sol";
 
-contract BenchmarkedTest is Test {
+contract BenchmarkTest is Test {
     /// @dev Address of the Huff DPDRepository contract.
     Repository public repository;
 
@@ -136,8 +136,8 @@ interface Repository {
     /// @notice Event emitted when a new DPD is added to the repository.
     event DPDAdded(uint256 indexed id, address owner, address updater, bytes32 cid);
 
-    /// @notice Event emitted when a new DPD is added to the repository.
-    event DPDUpdated(uint256 indexed id, bytes32 cid);
+    /// @notice Event emitted when a DPD is updated.
+    event DPDUpdated(uint256 indexed dpdId, bytes32 cid);
 
     /// @notice Event emitted when a DPD's owner is changed.
     event DPDOwnerUpdated(uint256 indexed id, address newOwner);

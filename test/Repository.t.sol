@@ -5,7 +5,7 @@ import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 
 contract RepositoryTest is Test {
-    /// @dev Address of the SimpleStore contract.
+    /// @dev Address of the Repository contract.
     Repository public repository;
 
     /// @notice Event emitted when a new DPD is added to the repository.
@@ -90,14 +90,25 @@ contract RepositoryTest is Test {
         repository.addDpd(0, address(this), address(this), bytes32(uint256(69)));
     }
 
-    /// @dev Ensure that you can update DPD data.
-    function testUpdateData() public {
-        vm.expectEmit(true, true, true, true);
-        emit DPDAdded(0, address(this), address(this), bytes32(uint256(69)));
-        repository.addDpd(0, address(this), address(this), bytes32(uint256(69)));
+    /// @dev Ensure that you can update DPD data as owner.
+    function testUpdateDataAsOwner() public {
+        repository.addDpd(0, address(this), address(0xBEEF), bytes32(uint256(69)));
+        repository.updateDpdData(0, bytes32(uint256(1000)));
 
-        vm.expectEmit(true, true, true, true);
-        emit DPDUpdated(0, bytes32(uint256(1000)));
+        assertEq(uint256(repository.dpds(0)), 1000);
+    }
+
+    /// @dev Ensure that you can update DPD data as updater.
+    function testUpdateDataAsUpdater() public {
+        repository.addDpd(0, address(0xBEEF), address(this), bytes32(uint256(69)));
+        repository.updateDpdData(0, bytes32(uint256(1000)));
+
+        assertEq(uint256(repository.dpds(0)), 1000);
+    }
+
+    /// @dev Ensure that you cannot update DPD data as non-owner/updater.
+    function testFailUpdateDataAsNonUpdaterNonOwner() public {
+        repository.addDpd(0, address(0xBEEF), address(0xBEEF), bytes32(uint256(69)));
         repository.updateDpdData(0, bytes32(uint256(1000)));
 
         assertEq(uint256(repository.dpds(0)), 1000);
@@ -152,12 +163,12 @@ interface Repository {
     /// @notice Event emitted when a new DPD is added to the repository.
     event DPDAdded(uint256 indexed id, address owner, address updater, bytes32 cid);
 
-    /// @notice Event emitted when a new DPD is added to the repository.
-    event DPDUpdated(uint256 indexed id, bytes32 cid);
+    /// @notice Event emitted when a DPD is updated.
+    event DPDUpdated(uint256 indexed dpdId, bytes32 cid);
 
     /// @notice Event emitted when a DPD's owner is changed.
-    event DPDOwnerUpdated(uint256 indexed id, address newOwner);
+    event DPDOwnerChanged(uint256 indexed dpdId, address newOwner);
 
     /// @notice Event emitted when a DPD's upgrader is changed.
-    event DPDUpdaterUpdated(uint256 indexed id, address newUpdater);
+    event DPDUpdaterChanged(uint256 indexed dpdId, address newUpdater);
 }
