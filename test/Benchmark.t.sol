@@ -33,16 +33,16 @@ contract BenchmarkTest is Test {
     }
 
     /// @dev Compare DPD Initialization Cost.
-    function testDpdInitialization() public {
+    function testCostDpdInitialization() public {
         Repository _repository = repository;
         DPDRepository _ogRepository = ogRepository;
 
         uint256 huffGasBefore = gasleft();
-        _repository.addDpd(0, 0, address(0), address(0));
+        _repository.addDpd(0, address(0), address(0), 0);
         uint256 huffGasCost = huffGasBefore - gasleft();
 
         uint256 solGasBefore = gasleft();
-        _ogRepository.addDpd(0, 0, address(0), address(0));
+        _ogRepository.addDpd(0, address(0), address(0), 0);
         uint256 solGasCost = solGasBefore - gasleft();
 
         console.log("    Huff addDpd Gas Cost:", huffGasCost);
@@ -54,15 +54,15 @@ contract BenchmarkTest is Test {
         Repository _repository = repository;
         DPDRepository _ogRepository = ogRepository;
 
-        _repository.addDpd(0, 0, address(this), address(this));
-        _ogRepository.addDpd(0, 0, address(this), address(this));
+        _repository.addDpd(0, address(this), address(this), 0);
+        _ogRepository.addDpd(0, address(this), address(this), 0);
 
         uint256 huffGasBefore = gasleft();
         _repository.updateDpdData(0, bytes32(uint256(1)));
         uint256 huffGasCost = huffGasBefore - gasleft();
 
         uint256 solGasBefore = gasleft();
-        _ogRepository.updateDpd(0, bytes32(uint256(1)));
+        _ogRepository.updateDpdData(0, bytes32(uint256(1)));
         uint256 solGasCost = solGasBefore - gasleft();
 
         console.log("    Huff updateDPD Gas Cost:", huffGasCost);
@@ -74,15 +74,15 @@ contract BenchmarkTest is Test {
         Repository _repository = repository;
         DPDRepository _ogRepository = ogRepository;
 
-        _repository.addDpd(0, 0, address(this), address(this));
-        _ogRepository.addDpd(0, 0, address(this), address(this));
+        _repository.addDpd(0, address(this), address(this), 0);
+        _ogRepository.addDpd(0, address(this), address(this), 0);
 
         uint256 huffGasBefore = gasleft();
         _repository.updateDpdOwner(0, address(1));
         uint256 huffGasCost = huffGasBefore - gasleft();
 
         uint256 solGasBefore = gasleft();
-        _ogRepository.setDpdOwner(0, address(1));
+        _ogRepository.updateDpdOwner(0, address(1));
         uint256 solGasCost = solGasBefore - gasleft();
 
         console.log("    Huff updateDPDOwner Gas Cost:", huffGasCost);
@@ -94,15 +94,15 @@ contract BenchmarkTest is Test {
         Repository _repository = repository;
         DPDRepository _ogRepository = ogRepository;
 
-        _repository.addDpd(0, 0, address(this), address(this));
-        _ogRepository.addDpd(0, 0, address(this), address(this));
+        _repository.addDpd(0, address(this), address(this), 0);
+        _ogRepository.addDpd(0, address(this), address(this), 0);
 
         uint256 huffGasBefore = gasleft();
         _repository.updateDpdUpdater(0, address(1));
         uint256 huffGasCost = huffGasBefore - gasleft();
 
         uint256 solGasBefore = gasleft();
-        _ogRepository.setDpdUpdater(0, address(1));
+        _ogRepository.updateDpdUpdater(0, address(1));
         uint256 solGasCost = solGasBefore - gasleft();
 
         console.log("    Huff updateDPDOwner Gas Cost:", huffGasCost);
@@ -111,45 +111,37 @@ contract BenchmarkTest is Test {
 }
 
 interface Repository {
-    /// @notice Given a DPD id, return its CID.
-    function dpds(uint256) external view returns (bytes32);
+    /// @notice Given a DPD id, return its CID (aka data).
+    function dpds(uint256 id) external view returns (bytes32);
 
     /// @notice Given a DPD id, return its owner address.
-    function owners(uint256) external view returns (address);
+    function owner(uint256 id) external view returns (address);
 
     /// @notice Given a DPD id, return its updater address.
-    function updaters(uint256) external view returns (address);
+    function updater(uint256 id) external view returns (address);
 
-    /// @notice Given a DPD id, return its current version.
-    function versions(uint256) external view returns (uint256);
-
-    /// @notice Given a DPD id, CID, owner address, and updater address, initialize a new DPD.
-    function addDpd(
-        uint256,
-        bytes32,
-        address,
-        address
-    ) external;
+    /// @notice Create a new DPD.
+    function addDpd(uint256 id, address owner, address updater, bytes32 cid) external;
 
     /// @notice Update a DPD CID.
     /// @notice Can only be called by the DPD's Updater address.
-    function updateDpdData(uint256, bytes32) external;
+    function updateDpdData(uint256 id, bytes32 cid) external;
 
     /// @notice Set a new DPD owner.
-    function updateDpdOwner(uint256, address) external;
+    function updateDpdOwner(uint256 id, address newOwner) external;
 
     /// @notice Set a new DPD updater.
-    function updateDpdUpdater(uint256, address) external;
+    function updateDpdUpdater(uint256 id, address newUpdater) external;
 
     /// @notice Event emitted when a new DPD is added to the repository.
-    event DPDAdded(uint256 indexed dpdId, address owner, address updater, bytes32 cid);
+    event DPDAdded(uint256 indexed id, address owner, address updater, bytes32 cid);
 
     /// @notice Event emitted when a DPD is updated.
     event DPDUpdated(uint256 indexed dpdId, bytes32 cid);
 
     /// @notice Event emitted when a DPD's owner is changed.
-    event DPDOwnerChanged(uint256 indexed dpdId, address newOwner);
+    event DPDOwnerUpdated(uint256 indexed id, address newOwner);
 
     /// @notice Event emitted when a DPD's upgrader is changed.
-    event DPDUpdaterChanged(uint256 indexed dpdId, address newUpdater);
+    event DPDUpdaterUpdated(uint256 indexed id, address newUpdater);
 }

@@ -20,7 +20,7 @@ contract DPDRepository {
 
     /// @notice Updaters mapped by DPD ID.
     /// @dev Excluded from DPD struct to avoid unnecessary allocation memory.
-    mapping(uint256 => address) public updaters;
+    mapping(uint256 => address) public updater;
 
     /// @notice Event emitted when a new DPD is added to the repository.
     event DPDAdded(uint256 indexed dpdId, address owner, address updater, bytes32 cid);
@@ -35,34 +35,34 @@ contract DPDRepository {
     event DPDUpdaterChanged(uint256 indexed dpdId, address newUpdater);
 
     /// @notice Function to add a new DPD.
-    /// @param cid DPD CID (content identifier).
     /// @param owner DPD owner address.
-    /// @param updater DPD updater address.
+    /// @param newUpdater DPD updater address.
+    /// @param cid DPD CID (content identifier).
     function addDpd(
         uint256 dpdId,
-        bytes32 cid,
         address owner,
-        address updater
+        address newUpdater,
+        bytes32 cid
     ) external {
         require(
             dpds[dpdId].cid == 0 &&
                 dpds[dpdId].owner == address(0) &&
                 versions[dpdId] == 0 &&
-                updaters[dpdId] == address(0),
+                updater[dpdId] == address(0),
             "DPD already initialized."
         );
         dpds[dpdId] = DPD(cid, owner);
-        updaters[dpdId] = updater;
-        emit DPDAdded(dpdId, owner, updater, cid);
+        updater[dpdId] = newUpdater;
+        emit DPDAdded(dpdId, owner, newUpdater, cid);
     }
 
     /// @notice Function to update a DPD's CID.
     /// @param dpdId DPD's ID in this repository.
     /// @param cid New DPD CID (content identifier).
-    function updateDpd(uint256 dpdId, bytes32 cid) external returns (uint256) {
-        address updater = updaters[dpdId];
+    function updateDpdData(uint256 dpdId, bytes32 cid) external returns (uint256) {
+        address this_updater = updater[dpdId];
         require(
-            msg.sender == updater || (msg.sender == dpds[dpdId].owner && updater == address(0)),
+            msg.sender == this_updater || (msg.sender == dpds[dpdId].owner && this_updater == address(0)),
             "Only DPD updater (or owner if no updater) can update this DPD."
         );
         dpds[dpdId].cid = cid;
@@ -74,7 +74,7 @@ contract DPDRepository {
     /// @notice Function to set a DPD's owner.
     /// @param dpdId DPD's ID in this repository.
     /// @param newOwner New owner address for this DPD.
-    function setDpdOwner(uint256 dpdId, address newOwner) external {
+    function updateDpdOwner(uint256 dpdId, address newOwner) external {
         require(msg.sender == dpds[dpdId].owner, "Only DPD owner can update this DPD's owner.");
         dpds[dpdId].owner = newOwner;
         emit DPDOwnerChanged(dpdId, newOwner);
@@ -83,9 +83,9 @@ contract DPDRepository {
     /// @notice Function to set a DPD's upgrader.
     /// @param dpdId DPD's ID in this repository.
     /// @param newUpdater New updater address for this DPD.
-    function setDpdUpdater(uint256 dpdId, address newUpdater) external {
+    function updateDpdUpdater(uint256 dpdId, address newUpdater) external {
         require(msg.sender == dpds[dpdId].owner, "Only DPD owner can update this DPD's updater.");
-        updaters[dpdId] = newUpdater;
+        updater[dpdId] = newUpdater;
         emit DPDUpdaterChanged(dpdId, newUpdater);
     }
 }
