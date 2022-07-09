@@ -92,7 +92,7 @@ contract RepositoryTest is Test {
 
     /// @dev Ensure that you can update DPD data as owner.
     function testUpdateDataAsOwner() public {
-        repository.addDpd(0, bytes32(uint256(69)), address(this), address(0xBEEF));
+        repository.addDpd(0, address(this), address(0xBEEF), bytes32(uint256(69)));
         repository.updateDpdData(0, bytes32(uint256(1000)));
 
         assertEq(uint256(repository.dpds(0)), 1000);
@@ -100,7 +100,7 @@ contract RepositoryTest is Test {
 
     /// @dev Ensure that you can update DPD data as updater.
     function testUpdateDataAsUpdater() public {
-        repository.addDpd(0, bytes32(uint256(69)), address(0xBEEF), address(this));
+        repository.addDpd(0, address(0xBEEF), address(this), bytes32(uint256(69)));
         repository.updateDpdData(0, bytes32(uint256(1000)));
 
         assertEq(uint256(repository.dpds(0)), 1000);
@@ -108,7 +108,7 @@ contract RepositoryTest is Test {
 
     /// @dev Ensure that you cannot update DPD data as non-owner/updater.
     function testFailUpdateDataAsNonUpdaterNonOwner() public {
-        repository.addDpd(0, bytes32(uint256(69)), address(0xBEEF), address(0xBEEF));
+        repository.addDpd(0, address(0xBEEF), address(0xBEEF), bytes32(uint256(69)));
         repository.updateDpdData(0, bytes32(uint256(1000)));
 
         assertEq(uint256(repository.dpds(0)), 1000);
