@@ -85,22 +85,52 @@ contract RepositoryTest is Test {
     }
 
     /// @dev Ensure that you cannot create two DPDs with the same ID.
-    function testFailNumberMustBeDifferent() public {
+    function testNumberMustBeDifferent() public {
         repository.addDpd(0, address(this), address(this), bytes32(uint256(69)));
+        vm.expectRevert(Repository.AlreadyExists.selector);
         repository.addDpd(0, address(this), address(this), bytes32(uint256(69)));
     }
 
-    /// @dev Ensure that you can update DPD data.
-    function testUpdateData() public {
-        vm.expectEmit(true, true, true, true);
-        emit DPDAdded(0, address(this), address(this), bytes32(uint256(69)));
+    /// @dev Ensure that non owner cannot update data
+    function testUpdateDataNoAuth() public {
         repository.addDpd(0, address(this), address(this), bytes32(uint256(69)));
+        vm.prank(address(20));
+        vm.expectRevert(Repository.OnlyOwnerOrUpdater.selector);
+        repository.updateDpdData(0, bytes32(uint256(1000)));
+    }
+
+    /// @dev Ensure that you can update DPD data.
+    function testUpdateDataAsOwner() public {
+        vm.expectEmit(true, true, true, true);
+        emit DPDAdded(0, address(this), address(20), bytes32(uint256(69)));
+        repository.addDpd(0, address(this), address(20), bytes32(uint256(69)));
 
         vm.expectEmit(true, true, true, true);
         emit DPDUpdated(0, bytes32(uint256(1000)));
         repository.updateDpdData(0, bytes32(uint256(1000)));
 
         assertEq(uint256(repository.dpds(0)), 1000);
+    }
+
+    /// @dev Ensure that you can update DPD data.
+    function testUpdateDataAsUpdater() public {
+        vm.expectEmit(true, true, true, true);
+        emit DPDAdded(0, address(20), address(this), bytes32(uint256(69)));
+        repository.addDpd(0, address(20), address(this), bytes32(uint256(69)));
+
+        vm.expectEmit(true, true, true, true);
+        emit DPDUpdated(0, bytes32(uint256(1000)));
+        repository.updateDpdData(0, bytes32(uint256(1000)));
+
+        assertEq(uint256(repository.dpds(0)), 1000);
+    }
+
+    /// @dev Ensure that non owner account cant update the updater address of a DPD.
+    function testUpdateUpdaterNoAuth() public {
+        repository.addDpd(0, address(this), address(this), bytes32(uint256(69)));
+        vm.prank(address(20));
+        vm.expectRevert(Repository.OnlyOwner.selector);
+        repository.updateDpdUpdater(0, address(20));
     }
 
     /// @dev Ensure that you can update the updater address of a DPD.
@@ -114,6 +144,14 @@ contract RepositoryTest is Test {
         assertEq(repository.updater(0), address(20));
     }
 
+    /// @dev Ensure that a non owner account cannot update the owner address of a DPD
+    function testUpdateOwnerNoAuth() public {
+        repository.addDpd(0, address(this), address(this), bytes32(uint256(69)));
+        vm.prank(address(20));
+        vm.expectRevert(Repository.OnlyOwner.selector);
+        repository.updateDpdOwner(0, address(20));
+    }
+
     /// @dev Ensure that you can update the owner address of a DPD.
     function testUpdateOwner() public {
         repository.addDpd(0, address(this), address(this), bytes32(uint256(69)));
@@ -123,6 +161,24 @@ contract RepositoryTest is Test {
         repository.updateDpdOwner(0, address(20));
 
         assertEq(repository.owner(0), address(20));
+    }
+
+    function testFuzzAddDpd(uint id, address owner, address owner2, address updater, address updater2, bytes32 cid, bytes32 cid2) public {
+        repository.addDpd(id, owner, updater, cid);
+        assertEq(repository.dpds(id), cid);
+
+        vm.prank(updater);
+        repository.updateDpdData(id, cid2);
+
+        vm.prank(owner);
+        repository.updateDpdOwner(id, owner2);
+
+        vm.prank(owner2);
+        repository.updateDpdUpdater(id, updater2);
+
+        assertEq(repository.dpds(id), cid2);
+        assertEq(repository.updater(id), updater2);
+        assertEq(repository.owner(id), owner2);
     }
 }
 
@@ -160,4 +216,10 @@ interface Repository {
 
     /// @notice Event emitted when a DPD's upgrader is changed.
     event DPDUpdaterUpdated(uint256 indexed id, address newUpdater);
+
+    error AlreadyExists();
+
+    error OnlyOwner();
+
+    error OnlyOwnerOrUpdater();
 }
