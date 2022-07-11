@@ -91,13 +91,13 @@
     STORE_ELEMENT_FROM_KEYS(0x00)               // [dpd_id]
 
     // Store the address of the owner.
-    0x24 calldataload                           // [owner, dpd_id, length*32, length]
+    0x24 calldataload MASK_ADDRESS()                         // [owner, dpd_id, length*32, length]
     dup2                                        // [dpd_id, owner, dpd_io, length*32, length]
     [DPD_OWNER_MAP_SLOT]                        // [salt, dpd_id, owner, dpd_io, length*32, length]
     STORE_ELEMENT_FROM_KEYS(0x00)               // [dpd_id, length*32, length]
 
     // Store the address of the updater.
-    0x44 calldataload                           // [updater, dpd_id, length*32, length]
+    0x44 calldataload MASK_ADDRESS()                          // [updater, dpd_id, length*32, length]
     dup2                                        // [dpd_id, updater, dpd_id, length*32, length]
     [DPD_UPDATER_MAP_SLOT]                      // [salt, dpd_id, updater, dpd_id, length*32, length]
     STORE_ELEMENT_FROM_KEYS(0x00)               // [dpd_id, length*32, length]
@@ -107,7 +107,29 @@
 
     // Revert if the checks are wrong.
     error:
-        0x00 0x00 revert
+        0x23369fa6 0x00 mstore    
+        0x04 0x1C revert          // Revert with custom error AlreadyExists()
+}
+
+#define macro IS_OWNER(error) = takes(0) returns (0) {
+    // Ensure that the sender is the DPD owner.
+    [DPD_OWNER_MAP_SLOT]                        // [salt, dpd_id, dpd_id, updater]
+    LOAD_ELEMENT_FROM_KEYS(0x00)                // [owner, dpd_id, updater]
+    caller                                      // [msg.sender, owner, dpd_id, updater]
+    eq iszero                                   // [msg.sender != owner, dpd_id, updater]
+}
+
+#define macro IS_UPDATER(error) = takes(0) returns (0) {
+    // Ensure that the sender is the DPD owner.
+    [DPD_UPDATER_MAP_SLOT]                      // [salt, dpd_id, dpd_id, updater]
+    LOAD_ELEMENT_FROM_KEYS(0x00)                // [owner, dpd_id, updater]
+    caller                                      // [msg.sender, owner, dpd_id, updater]
+    eq iszero                                   // [msg.sender != owner, dpd_id, updater]
+}
+
+#define macro ONLY_OWNER(error) = takes(0) returns (0) {
+    IS_OWNER(error)
+    <error> jumpi                                 // [dpd_id, updater]
 }
 
 // Ensure that a DPD ID has not been taken.
@@ -152,17 +174,11 @@
     log2                                // [dpd_id, data]
 
     // Ensure that the sender is the DPD updater or owner.
-    dup1                                // [dpd_id, dpd_id, data]
-    [DPD_UPDATER_MAP_SLOT]              // [salt, dpd_id, dpd_id, data]
-    LOAD_ELEMENT_FROM_KEYS(0x00)        // [updater, dpd_id, data]
-    caller                              // [msg.sender, updater, dpd_id, data]
-    eq iszero                           // [msg.sender!=updater, dpd_id, data]
+    dup1
+    IS_UPDATER()                        // [msg.sender!=updater, dpd_id, data]
     dup2                                // [dpd_id, msg.sender!=updater, dpd_id, data]
-    [DPD_OWNER_MAP_SLOT]                // [salt, dpd_id, msg.sender!=updater, dpd_id, data]
-    LOAD_ELEMENT_FROM_KEYS(0x00)        // [owner, msg.sender!=updater, dpd_id, data]
-    caller                              // [msg.sender, owner, msg.sender!=updater, dpd_id, data]
-    eq iszero                           // [msg.sender!=owner, msg.sender!=updater, dpd_id, data]
-    or                                  // [msg.sender!=owner || msg.sender!=updater, dpd_id, data]
+    IS_OWNER()                          // [msg.sender!=owner, msg.sender!=updater, dpd_id, data]
+    and                                 // [msg.sender!=owner && msg.sender!=updater, dpd_id, data]
     error jumpi                         // [dpd_id, data]
 
     // Store new data.
@@ -174,8 +190,10 @@
 
     // Error label.
     error:
-        0x00 0x00 revert
+        0x9bb09934 0x00 mstore
+        0x04 0x1C revert               // Revert with error OnlyOwnerOrUpdater()
 }
+
 
 #define macro UPDATE_DPD_UPDATER() = takes(0) returns (0) {
     // Retrieve the DPD ID and data.
@@ -190,15 +208,8 @@
     0x00 mstore                                 // [sig, dpd_id, dpd_id, updater]
     0x20 0x00                                   // [offset, size, sig, dpd_id, dpd_id, updater]
     log2                                        // [dpd_id, updater]
-
-
-    // Ensure that the sender is the DPD owner.
     dup1                                        // [dpd_id, dpd_id, updater]
-    [DPD_OWNER_MAP_SLOT]                        // [salt, dpd_id, dpd_id, updater]
-    LOAD_ELEMENT_FROM_KEYS(0x00)                // [owner, dpd_id, updater]
-    caller                                      // [msg.sender, owner, dpd_id, updater]
-    eq iszero                                   // [msg.sender != owner, dpd_id, updater]
-    error jumpi                                 // [dpd_id, updater]
+    ONLY_OWNER(error)                           // [dpd_id, updater]
 
     // Store new data.
     [DPD_UPDATER_MAP_SLOT]                      // [salt, dpd_id, updater]
@@ -209,12 +220,14 @@
 
     // Error label.
     error:
-        0x00 0x00 revert
+        0x5fc483c5 0x00 mstore
+        0x04 0x1C revert          // Revert with custom error OnlyOwner()
+
 }
 
 #define macro UPDATE_DPD_OWNER() = takes(0) returns (0) {
     // Retrieve the DPD ID and data.
-    0x24 calldataload                         // [owner]
+    0x24 calldataload MASK_ADDRESS()          // [owner]
     0x04 calldataload                         // [dpd_id, owner]
 
     // Emit the event.
@@ -228,11 +241,7 @@
 
     // Ensure that the sender is the DPD owner.
     dup1                                      // [dpd_id, dpd_id, owner]
-    [DPD_OWNER_MAP_SLOT]                      // [salt, dpd_id, dpd_id, owner]
-    LOAD_ELEMENT_FROM_KEYS(0x00)              // [owner, dpd_id, owner]
-    caller                                    // [msg.sender, owner, dpd_id, owner]
-    eq iszero                                 // [msg.sender != owner, dpd_id, owner]
-    error jumpi                               // [dpd_id, owner]
+    ONLY_OWNER(error)                         // [dpd_id, owner]
 
     // Store new data.
     [DPD_OWNER_MAP_SLOT]                      // [salt, dpd_id, owner]
@@ -243,7 +252,8 @@
 
     // Error label.
     error:
-        0x00 0x00 revert
+        0x5fc483c5 0x00 mstore
+        0x04 0x1C revert          // Revert with custom error OnlyOwner()
 }
 
 /* Main Macro */
